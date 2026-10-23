@@ -19,6 +19,21 @@ import './Analytics.css';
 // Vibrant palette for donut charts
 const DONUT_COLORS = ['#8B5CF6', '#EC4899', '#F97316', '#10B981', '#38BDF8', '#F59E0B'];
 
+function ChartTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+
+  const item = payload[0];
+  const name = item.name || label || item.payload?.name;
+  const value = item.value ?? item.payload?.count ?? item.payload?.clicks;
+
+  return (
+    <div className="chart-tooltip">
+      <span className="chart-tooltip-name">{name}</span>
+      <span className="chart-tooltip-count">{value}</span>
+    </div>
+  );
+}
+
 export default function Analytics() {
   const { id } = useParams();
   const [data, setData] = useState(null);
@@ -194,13 +209,7 @@ export default function Analytics() {
               />
               <Tooltip
                 cursor={{ fill: 'rgba(255, 255, 255, 0.04)' }}
-                contentStyle={{
-                  backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                  borderColor: 'rgba(236, 72, 153, 0.45)',
-                  borderRadius: '10px',
-                  color: '#FFFFFF',
-                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)',
-                }}
+                content={<ChartTooltip />}
               />
               <Bar
                 dataKey="clicks"
@@ -242,14 +251,7 @@ export default function Analytics() {
                         />
                       ))}
                     </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                        borderColor: 'rgba(255, 255, 255, 0.2)',
-                        borderRadius: '8px',
-                        color: '#FFFFFF',
-                      }}
-                    />
+                    <Tooltip content={<ChartTooltip />} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -301,14 +303,7 @@ export default function Analytics() {
                         />
                       ))}
                     </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                        borderColor: 'rgba(255, 255, 255, 0.2)',
-                        borderRadius: '8px',
-                        color: '#FFFFFF',
-                      }}
-                    />
+                    <Tooltip content={<ChartTooltip />} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>

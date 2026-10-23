@@ -75,10 +75,70 @@ export const handleRedirect = async (req, res, next) => {
       });
     }
 
-    // 3. Asynchronously record the analytics without awaiting
+    // 3. Check for Password Protection
+    if (url.passcode) {
+      const providedCode = req.query.passcode || req.headers['x-link-passcode'];
+      if (!providedCode || providedCode !== url.passcode) {
+        // Return a clean HTML passcode verification prompt so browser users can unlock it
+        return res.status(401).send(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8"/>
+              <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+              <title>Password Protected Link - LinkVault</title>
+              <style>
+                body {
+                  margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+                  background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #311042 100%);
+                  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                  color: #F8FAFC;
+                }
+                .card {
+                  background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px);
+                  border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px;
+                  padding: 2.2rem 2.5rem; max-width: 400px; width: 90%; text-align: center;
+                  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+                }
+                h2 { margin: 0 0 0.5rem 0; font-size: 1.4rem; color: #F472B6; }
+                p { font-size: 0.9rem; color: #94A3B8; margin-bottom: 1.5rem; }
+                input {
+                  width: 100%; box-sizing: border-box; padding: 0.75rem 1rem;
+                  background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.2);
+                  border-radius: 8px; color: #FFF; font-size: 1rem; margin-bottom: 1rem;
+                  outline: none; text-align: center; letter-spacing: 2px;
+                }
+                input:focus { border-color: #EC4899; }
+                button {
+                  width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #6366F1, #EC4899);
+                  border: none; border-radius: 8px; color: #FFF; font-size: 1rem; font-weight: 600;
+                  cursor: pointer; transition: opacity 0.2s;
+                }
+                button:hover { opacity: 0.9; }
+                .err { color: #EF4444; font-size: 0.85rem; margin-top: 0.75rem; display: none; }
+              </style>
+            </head>
+            <body>
+              <div class="card">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔒</div>
+                <h2>Password Required</h2>
+                <p>This LinkVault link is protected by its creator. Enter the passcode to proceed.</p>
+                <form method="GET" action="/${shortCode}">
+                  <input type="password" name="passcode" placeholder="Enter Passcode" required autofocus />
+                  <button type="submit">Unlock & Open Link ➔</button>
+                  ${providedCode ? '<div style="color: #EF4444; margin-top: 0.75rem; font-size: 0.85rem;">Incorrect passcode. Please try again.</div>' : ''}
+                </form>
+              </div>
+            </body>
+          </html>
+        `);
+      }
+    }
+
+    // 4. Asynchronously record the analytics without awaiting
     recordClickAsync(url._id, req);
 
-    // 4. Perform temporary HTTP 302 redirect
+    // 5. Perform temporary HTTP 302 redirect
     return res.redirect(302, url.originalUrl);
   } catch (error) {
     next(error);

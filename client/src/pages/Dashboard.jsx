@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { fetchUrls, deleteShortUrl } from '../api/client';
+import { fetchUrls, deleteShortUrl, updateShortUrl } from '../api/client';
 import './Dashboard.css';
 
 export default function Dashboard() {
@@ -9,6 +9,13 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+
+  // Edit Link Modal state
+  const [editingItem, setEditingItem] = useState(null);
+  const [editUrl, setEditUrl] = useState('');
+  const [editExpiry, setEditExpiry] = useState('');
+  const [editPasscode, setEditPasscode] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
 
   // Search & Sort state
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,6 +60,44 @@ export default function Dashboard() {
       toast.error('Failed to delete link');
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const openEditModal = (item) => {
+    setEditingItem(item);
+    setEditUrl(item.originalUrl);
+    setEditExpiry('');
+    setEditPasscode('');
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    if (!editUrl.trim()) {
+      toast.error('Destination URL cannot be empty');
+      return;
+    }
+
+    try {
+      setSavingEdit(true);
+      const payload = { originalUrl: editUrl.trim() };
+      if (editExpiry !== '') {
+        payload.expiresInDays = Number(editExpiry);
+      }
+      if (editPasscode !== undefined && editPasscode !== '') {
+        payload.passcode = editPasscode.trim();
+      }
+
+      const res = await updateShortUrl(editingItem._id, payload);
+      toast.success('Link updated successfully!');
+
+      setUrls((prev) =>
+        prev.map((item) => (item._id === editingItem._id ? { ...item, ...res.url } : item))
+      );
+      setEditingItem(null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update link');
+    } finally {
+      setSavingEdit(false);
     }
   };
 
@@ -229,7 +274,14 @@ export default function Dashboard() {
                     >
                       /{item.shortCode} ↗
                     </a>
-                    <span className={`badge ${badge.className}`}>{badge.text}</span>
+                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                      {item.isProtected && (
+                        <span className="badge" style={{ background: 'rgba(234, 179, 8, 0.2)', color: '#FACC15', borderColor: 'rgba(234, 179, 8, 0.4)' }}>
+                          🔒 PASS
+                        </span>
+                      )}
+                      <span className={`badge ${badge.className}`}>{badge.text}</span>
+                    </div>
                   </div>
 
                   {/* Clickable Full Short URL */}
@@ -256,53 +308,137 @@ export default function Dashboard() {
                     </span>
                   </div>
 
-                  {/* 4 Uniform Single-Line Action Buttons (2x2 on narrow screens) */}
-                  <div className="link-card-actions">
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => handleCopy(item._id, item.shortUrl)}
-                      title="Copy short URL"
-                    >
-                      <span>{isCopied ? '✓' : '📋'}</span>
-                      <span>{isCopied ? 'Copied' : 'Copy'}</span>
-                    </button>
+                    {/* 5 Uniform Action Buttons */}
+                    <div className="link-card-actions">
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => handleCopy(item._id, item.shortUrl)}
+                        title="Copy short URL"
+                      >
+                        <span>{isCopied ? '✓' : '📋'}</span>
+                        <span>{isCopied ? 'Copied' : 'Copy'}</span>
+                      </button>
 
-                    <a
-                      href={item.shortUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="btn btn-secondary"
-                      title="Open in new tab"
-                    >
-                      <span>🚀</span>
-                      <span>Open</span>
-                    </a>
+                      <a
+                        href={item.shortUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-secondary"
+                        title="Open in new tab"
+                      >
+                        <span>🚀</span>
+                        <span>Open</span>
+                      </a>
 
-                    <Link
-                      to={`/analytics/${item._id}`}
-                      className="btn btn-secondary"
-                      title="View click statistics"
-                    >
-                      <span>📊</span>
-                      <span>Stats</span>
-                    </Link>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => openEditModal(item)}
+                        title="Edit link destination or expiration"
+                      >
+                        <span>✏️</span>
+                        <span>Edit</span>
+                      </button>
 
-                    <button
-                      type="button"
-                      className="btn btn-danger"
-                      disabled={deletingId === item._id}
-                      onClick={() => handleDelete(item._id, item.shortCode)}
-                      title="Delete link"
-                    >
-                      <span>🗑️</span>
-                      <span>{deletingId === item._id ? '...' : 'Delete'}</span>
-                    </button>
-                  </div>
+                      <Link
+                        to={`/analytics/${item._id}`}
+                        className="btn btn-secondary"
+                        title="View click statistics"
+                      >
+                        <span>📊</span>
+                        <span>Stats</span>
+                      </Link>
+
+                      <button
+                        type="button"
+                        className="btn btn-danger"
+                        disabled={deletingId === item._id}
+                        onClick={() => handleDelete(item._id, item.shortCode)}
+                        title="Delete link"
+                      >
+                        <span>🗑️</span>
+                        <span>{deletingId === item._id ? '...' : 'Del'}</span>
+                      </button>
+                    </div>
                 </div>
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Edit Link Modal */}
+      {editingItem && (
+        <div className="modal-backdrop">
+          <div className="glass-card modal-box slide-in">
+            <div className="modal-header">
+              <h3>✏️ Edit Short Link (/{editingItem.shortCode})</h3>
+              <button
+                type="button"
+                className="modal-close"
+                onClick={() => setEditingItem(null)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit}>
+              <div className="form-group" style={{ marginBottom: '0.85rem' }}>
+                <label className="form-label">Destination URL *</label>
+                <input
+                  type="url"
+                  className="form-input"
+                  value={editUrl}
+                  onChange={(e) => setEditUrl(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '0.85rem' }}>
+                <label className="form-label">Extend / Reset Expiration</label>
+                <select
+                  className="form-select"
+                  value={editExpiry}
+                  onChange={(e) => setEditExpiry(e.target.value)}
+                >
+                  <option value="">Keep Current Expiry</option>
+                  <option value="0">Never Expire (Remove Expiry)</option>
+                  <option value="1">Extend +1 Day from now</option>
+                  <option value="7">Extend +7 Days from now</option>
+                  <option value="30">Extend +30 Days from now</option>
+                </select>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                <label className="form-label">Change Passcode (Leave empty to keep current)</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="New passcode or empty to keep"
+                  value={editPasscode}
+                  onChange={(e) => setEditPasscode(e.target.value)}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setEditingItem(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={savingEdit}
+                >
+                  {savingEdit ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

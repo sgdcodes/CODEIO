@@ -3,6 +3,7 @@ import {
   createUrl,
   getUrls,
   deleteUrl,
+  updateUrl,
   getAnalytics,
 } from '../controllers/urlController.js';
 import { shortenLimiter } from '../middleware/rateLimiter.js';
@@ -17,6 +18,9 @@ router.get('/', getUrls);
 
 // DELETE /api/urls/:id - Delete a specific URL
 router.delete('/:id', deleteUrl);
+
+// PATCH /api/urls/:id - Update link URL, expiry, or passcode
+router.patch('/:id', updateUrl);
 
 // GET /api/urls/:id/analytics - Get analytics report for a URL
 router.get('/:id/analytics', getAnalytics);

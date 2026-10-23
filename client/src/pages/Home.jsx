@@ -7,6 +7,7 @@ export default function Home() {
   const [originalUrl, setOriginalUrl] = useState('');
   const [customAlias, setCustomAlias] = useState('');
   const [expiresInDays, setExpiresInDays] = useState('');
+  const [passcode, setPasscode] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -47,6 +48,7 @@ export default function Home() {
         originalUrl,
         customAlias,
         expiresInDays,
+        passcode,
       });
 
       setResult(data);
@@ -55,6 +57,7 @@ export default function Home() {
       setOriginalUrl('');
       setCustomAlias('');
       setExpiresInDays('');
+      setPasscode('');
       loadStats();
     } catch (err) {
       const errorMessage =
@@ -156,6 +159,17 @@ export default function Home() {
             </div>
           </div>
 
+          <div className="form-group">
+            <label className="form-label">Passcode Protection 🔒 (Optional)</label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="e.g. 1234 or secretKey (Leave empty for public link)"
+              value={passcode}
+              onChange={(e) => setPasscode(e.target.value)}
+            />
+          </div>
+
           <button
             type="submit"
             className="btn btn-primary shorten-btn"
@@ -171,6 +185,33 @@ export default function Home() {
             )}
           </button>
         </form>
+      </div>
+
+      {/* How it Works / Feature Guide (Pointwise & Informative) */}
+      <div className="home-guide-grid fade-in">
+        <div className="guide-card">
+          <div className="guide-icon">✂️</div>
+          <h4>1. Shorten & Brand</h4>
+          <p>
+            Paste any long, ugly link and turn it into a short, tidy URL. Add a custom name like <code>/my-portfolio</code> for easy recall.
+          </p>
+        </div>
+
+        <div className="guide-card">
+          <div className="guide-icon">⏳</div>
+          <h4>2. Auto-Expiring Links</h4>
+          <p>
+            Running a limited sale or private event? Set links to expire in 1, 7, or 30 days so they deactivate automatically when time is up.
+          </p>
+        </div>
+
+        <div className="guide-card">
+          <div className="guide-icon">📊</div>
+          <h4>3. Real-Time Tracking</h4>
+          <p>
+            Visit your Dashboard anytime to inspect every click. See which devices, browsers, and platforms your audience is using.
+          </p>
+        </div>
       </div>
 
       {/* Result Card with Slide-In Animation */}

@@ -121,6 +121,33 @@
   margin-bottom: 1rem;
 }
 
+.chart-tooltip {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.75rem;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.92) 0%, rgba(236, 72, 153, 0.92) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 10px;
+  box-shadow: 0 8px 22px rgba(139, 92, 246, 0.4);
+  color: #FFFFFF;
+  font-size: 0.85rem;
+}
+
+.chart-tooltip-name {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.chart-tooltip-count {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.1rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+
 .breakdown-list {
   list-style: none;
   display: flex;

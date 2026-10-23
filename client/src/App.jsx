@@ -7,10 +7,14 @@ import Dashboard from './pages/Dashboard';
 import Analytics from './pages/Analytics';
 import NotFound from './pages/NotFound';
 import PokemonWalker from './components/PokemonWalker';
+import BackgroundPaths from './components/BackgroundPaths';
 
 export default function App() {
   return (
     <div className="app-layout">
+      {/* Interactive flowing background paths */}
+      <BackgroundPaths />
+
       {/* Toast notifications container */}
       <Toaster
         position="top-right"

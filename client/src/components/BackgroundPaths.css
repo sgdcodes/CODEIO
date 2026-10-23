@@ -1,0 +1,17 @@
+.background-paths-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  mask-image: radial-gradient(ellipse 85% 75% at 50% 50%, rgba(0, 0, 0, 0.75), transparent);
+  -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 50%, rgba(0, 0, 0, 0.75), transparent);
+}
+
+.background-paths-canvas {
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+}

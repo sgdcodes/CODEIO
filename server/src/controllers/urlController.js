@@ -25,7 +25,7 @@ const buildShortUrl = (req, shortCode) => {
  */
 export const createUrl = async (req, res, next) => {
   try {
-    let { originalUrl, customAlias, expiresInDays } = req.body;
+    let { originalUrl, customAlias, expiresInDays, passcode } = req.body;
 
     // 1. Validate original URL
     if (!originalUrl || typeof originalUrl !== 'string') {
@@ -126,6 +126,7 @@ export const createUrl = async (req, res, next) => {
       originalUrl,
       shortCode,
       expiresAt,
+      passcode: passcode && typeof passcode === 'string' && passcode.trim() ? passcode.trim() : null,
     });
 
     const shortUrl = buildShortUrl(req, newUrl.shortCode);
@@ -137,6 +138,7 @@ export const createUrl = async (req, res, next) => {
       shortUrl,
       originalUrl: newUrl.originalUrl,
       expiresAt: newUrl.expiresAt,
+      isProtected: Boolean(newUrl.passcode),
       createdAt: newUrl.createdAt,
     });
   } catch (error) {
@@ -154,8 +156,11 @@ export const getUrls = async (req, res, next) => {
 
     const formattedUrls = urls.map((url) => {
       const urlObj = url.toObject();
+      const hasPasscode = Boolean(urlObj.passcode);
+      delete urlObj.passcode; // do not expose passcode hash/value in list
       return {
         ...urlObj,
+        isProtected: hasPasscode,
         shortUrl: buildShortUrl(req, url.shortCode),
         status: getUrlStatus(url.expiresAt),
       };
@@ -204,6 +209,87 @@ export const deleteUrl = async (req, res, next) => {
       success: true,
       message: 'Link deleted successfully',
       id,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PATCH /api/urls/:id
+ * Update destination URL, extend expiration date, or toggle passcode
+ */
+export const updateUrl = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { originalUrl, expiresInDays, passcode } = req.body;
+
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid link ID format',
+      });
+    }
+
+    const url = await Url.findById(id);
+    if (!url) {
+      return res.status(404).json({
+        success: false,
+        message: 'URL not found',
+      });
+    }
+
+    // 1. Update destination URL if provided
+    if (originalUrl !== undefined) {
+      const trimmed = String(originalUrl).trim();
+      if (!validator.isURL(trimmed, { protocols: ['http', 'https'], require_protocol: true })) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid URL. Please provide a valid URL including http:// or https://',
+        });
+      }
+      url.originalUrl = trimmed;
+    }
+
+    // 2. Update expiration if provided
+    if (expiresInDays !== undefined) {
+      if (expiresInDays === null || expiresInDays === '' || expiresInDays === 0) {
+        url.expiresAt = null; // Clear expiration
+      } else {
+        const days = Number(expiresInDays);
+        if (isNaN(days) || days <= 0) {
+          return res.status(400).json({
+            success: false,
+            message: 'expiresInDays must be a positive number',
+          });
+        }
+        url.expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+      }
+    }
+
+    // 3. Update passcode if provided
+    if (passcode !== undefined) {
+      if (!passcode || !String(passcode).trim()) {
+        url.passcode = null;
+      } else {
+        url.passcode = String(passcode).trim();
+      }
+    }
+
+    await url.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Link updated successfully',
+      url: {
+        _id: url._id,
+        shortCode: url.shortCode,
+        shortUrl: buildShortUrl(req, url.shortCode),
+        originalUrl: url.originalUrl,
+        expiresAt: url.expiresAt,
+        status: getUrlStatus(url.expiresAt),
+        isProtected: Boolean(url.passcode),
+      },
     });
   } catch (error) {
     next(error);

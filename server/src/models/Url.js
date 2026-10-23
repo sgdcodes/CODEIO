@@ -23,6 +23,11 @@ const urlSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    // Optional passcode protection for links
+    passcode: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true, // Automatically provides createdAt and updatedAt

@@ -12,7 +12,7 @@ const apiClient = axios.create({
 });
 
 // API helper functions
-export const createShortUrl = async ({ originalUrl, customAlias, expiresInDays }) => {
+export const createShortUrl = async ({ originalUrl, customAlias, expiresInDays, passcode }) => {
   const payload = { originalUrl: originalUrl.trim() };
   if (customAlias && customAlias.trim()) {
     payload.customAlias = customAlias.trim();
@@ -20,7 +20,15 @@ export const createShortUrl = async ({ originalUrl, customAlias, expiresInDays }
   if (expiresInDays) {
     payload.expiresInDays = Number(expiresInDays);
   }
+  if (passcode && passcode.trim()) {
+    payload.passcode = passcode.trim();
+  }
   const response = await apiClient.post('/api/urls', payload);
+  return response.data;
+};
+
+export const updateShortUrl = async (id, data) => {
+  const response = await apiClient.patch(`/api/urls/${id}`, data);
   return response.data;
 };
 
