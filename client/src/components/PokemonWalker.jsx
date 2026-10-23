@@ -298,6 +298,20 @@ export default function PokemonWalker() {
             );
           })}
         </div>
+
+        {/* Integrated bottom credit bar */}
+        <div className="pokemon-track-footer">
+          <span>⚡ Built with the MERN stack (MongoDB, Express, React, Node)</span>
+          <span className="footer-dot">•</span>
+          <a
+            href="https://github.com"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="GitHub Repository"
+          >
+            GitHub Repository ↗
+          </a>
+        </div>
       </div>
     </div>
   );

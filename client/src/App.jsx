@@ -43,32 +43,18 @@ export default function App() {
 
       {/* Page Routing */}
       <main className="main-content">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/analytics/:id" element={<Analytics />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <div className="page-body">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/analytics/:id" element={<Analytics />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
 
-        {/* Interactive Walking Pokémon below the main content boxes */}
+        {/* Interactive Walking Pokémon docked edge-to-edge covering the bottom */}
         <PokemonWalker />
       </main>
-
-      {/* Simple Footer */}
-      <footer className="footer">
-        <div className="container footer-content">
-          <span>⚡ Built with the MERN stack (MongoDB, Express, React, Node)</span>
-          <span>•</span>
-          <a
-            href="https://github.com"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="GitHub Repository"
-          >
-            GitHub Repository ↗
-          </a>
-        </div>
-      </footer>
     </div>
   );
 }

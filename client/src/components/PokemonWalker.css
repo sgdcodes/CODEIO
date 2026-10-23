@@ -1,26 +1,36 @@
+/* Full-width docked Pokemon Walker covering the entire bottom */
 .pokemon-walker-container {
-  margin: 0.75rem auto 0.5rem auto;
-  max-width: 1140px;
-  padding: 0 1rem;
+  margin-top: auto;
+  margin-bottom: 0;
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
   user-select: none;
+  z-index: 30;
 }
 
 .pokemon-track-card {
   position: relative;
-  overflow: hidden;
-  padding: 0.65rem 1rem 0.5rem 1rem;
-  background: rgba(15, 23, 42, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--radius-md);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  width: 100%;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+  padding: 0.65rem 1.5rem 0.5rem 1.5rem;
+  box-sizing: border-box;
 }
 
 .pokemon-track-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.45rem;
-  padding: 0 0.25rem;
+  margin-bottom: 0.35rem;
+  padding: 0 0.5rem;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
@@ -70,12 +80,13 @@
   transform: translateY(-1px);
 }
 
-/* The walking field/stage */
+/* The walking field/stage spanning edge-to-edge across the screen */
 .pokemon-stage {
   position: relative;
-  height: 80px;
+  height: 85px;
   border-bottom: 2px dashed rgba(236, 72, 153, 0.35);
-  overflow: hidden;
+  overflow: visible;
+  width: 100%;
 }
 
 /* Ground glow and decorative grass/particles */
@@ -84,8 +95,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 10px;
-  background: linear-gradient(to top, rgba(236, 72, 153, 0.15), transparent);
+  height: 12px;
+  background: linear-gradient(to top, rgba(236, 72, 153, 0.2), transparent);
   pointer-events: none;
 }
 
@@ -102,7 +113,7 @@
 }
 
 .pokemon-walker:hover {
-  filter: drop-shadow(0 0 8px rgba(244, 114, 182, 0.8));
+  filter: drop-shadow(0 0 10px rgba(244, 114, 182, 0.9));
 }
 
 .pokemon-walker.cheering {
@@ -174,9 +185,44 @@
   100% { transform: translateY(0) scale(1); opacity: 1; }
 }
 
+/* Bottom Integrated Footer Credit Strip */
+.pokemon-track-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding-top: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+  flex-wrap: wrap;
+}
+
+.pokemon-track-footer a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.pokemon-track-footer a:hover {
+  color: #F472B6;
+  text-decoration: underline;
+}
+
+.footer-dot {
+  color: rgba(255, 255, 255, 0.25);
+}
+
 /* Responsive adjustment */
 @media (max-width: 640px) {
+  .pokemon-track-card {
+    padding: 0.5rem 0.75rem 0.4rem 0.75rem;
+  }
   .pokemon-stage {
     height: 72px;
+  }
+  .pokemon-track-footer {
+    font-size: 0.74rem;
+    gap: 0.4rem;
   }
 }
