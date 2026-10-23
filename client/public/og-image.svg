@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0f;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f1623;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ff810a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#73bfc4;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)" />
+
+  <!-- Decorative glowing orb top-right -->
+  <circle cx="1050" cy="120" r="200" fill="#ff810a" opacity="0.07" />
+  <circle cx="200" cy="520" r="160" fill="#73bfc4" opacity="0.06" />
+
+  <!-- Accent bar -->
+  <rect x="80" y="240" width="6" height="140" rx="3" fill="url(#accent)" />
+
+  <!-- Logo / Brand name -->
+  <text x="110" y="300" font-family="'Space Grotesk', 'Segoe UI', sans-serif" font-size="72" font-weight="700" fill="#ffffff">Link</text>
+  <text x="284" y="300" font-family="'Space Grotesk', 'Segoe UI', sans-serif" font-size="72" font-weight="700" fill="#ff810a">Vault</text>
+
+  <!-- Tagline -->
+  <text x="110" y="360" font-family="'Poppins', 'Segoe UI', sans-serif" font-size="30" font-weight="400" fill="#a0aec0">Shorten · Track · Analyze — in real-time</text>
+
+  <!-- Features row -->
+  <rect x="110" y="410" width="220" height="48" rx="24" fill="#ffffff" opacity="0.06" />
+  <text x="220" y="442" text-anchor="middle" font-family="'Poppins', 'Segoe UI', sans-serif" font-size="18" fill="#73bfc4">Custom Aliases</text>
+
+  <rect x="350" y="410" width="200" height="48" rx="24" fill="#ffffff" opacity="0.06" />
+  <text x="450" y="442" text-anchor="middle" font-family="'Poppins', 'Segoe UI', sans-serif" font-size="18" fill="#73bfc4">Auto-Expiry</text>
+
+  <rect x="570" y="410" width="220" height="48" rx="24" fill="#ffffff" opacity="0.06" />
+  <text x="680" y="442" text-anchor="middle" font-family="'Poppins', 'Segoe UI', sans-serif" font-size="18" fill="#73bfc4">Click Analytics</text>
+
+  <rect x="810" y="410" width="240" height="48" rx="24" fill="#ffffff" opacity="0.06" />
+  <text x="930" y="442" text-anchor="middle" font-family="'Poppins', 'Segoe UI', sans-serif" font-size="18" fill="#73bfc4">Password Lock</text>
+
+  <!-- Bottom URL -->
+  <text x="110" y="560" font-family="'Poppins', 'Segoe UI', sans-serif" font-size="22" fill="#4a5568">linkvault-mqxy2sew4-alpha-d610.vercel.app</text>
+</svg>
