@@ -126,7 +126,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .main-content {
   flex: 1;
-  padding-bottom: 2rem;
+  padding-bottom: 0.5rem;
 }
 
 /* Buttons */
@@ -323,9 +323,9 @@ h1, h2, h3, h4, h5, h6 {
   border-top: 1px solid var(--card-border);
   background: rgba(15, 23, 42, 0.5);
   backdrop-filter: blur(12px);
-  padding: 1.25rem 0;
+  padding: 0.65rem 0;
   text-align: center;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   color: var(--text-subtle);
   margin-top: auto;
 }
