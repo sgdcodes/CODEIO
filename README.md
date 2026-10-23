@@ -82,6 +82,6 @@ npm test
 
 ## 📖 Detailed Documentation
 
-* [Backend Architecture & Interview Guide](docs/BACKEND-ARCHITECTURE-AND-INTERVIEW-GUIDE.md)
+* [Backend Architecture & Technical Specification](docs/BACKEND-ARCHITECTURE.md)
 * [Frontend Architecture Guide](docs/FRONTEND-ARCHITECTURE.md)
 * [Complete System Architecture](docs/SYSTEM-ARCHITECTURE.md)

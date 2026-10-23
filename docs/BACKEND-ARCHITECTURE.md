@@ -1,6 +1,6 @@
-# LinkVault — Complete Backend Guide & Interview Cheatsheet
+# LinkVault — Backend Architecture & Technical Specification
 
-Welcome! This document explains **exactly how the LinkVault backend works** in simple, plain English. It includes **ASCII diagrams**, **point-by-point execution flows**, and **ready-to-use interview answers** so you can confidently answer any question from recruiters or judges.
+This document provides a comprehensive technical breakdown of the LinkVault backend architecture, request execution lifecycles, data models, and core system design decisions.
 
 ---
 
@@ -75,19 +75,19 @@ User visits /xyz ──► Look up shortCode ──► Expired? (410) ──► 
 
 ---
 
-## 3. Top Interview Questions & How to Answer Them
+## 3. Key Technical Decisions & Rationale
 
-### Q1: Why HTTP 302 instead of HTTP 301 for redirects?
-> **Answer:** *"HTTP 301 is a Permanent Redirect, which browsers cache aggressively on disk. If we used 301, subsequent visits from the same user would bypass our server entirely, breaking click tracking and preventing link expiration. HTTP 302 is a Temporary Redirect, which forces the browser to hit our server every single time, ensuring 100% accurate analytics and instant expiry enforcement."*
+### Decision 1: HTTP 302 (Found) vs HTTP 301 (Moved Permanently)
+* **Rationale:** HTTP 301 is a permanent redirect that browsers cache aggressively on client disks. If 301 were used, repeat visits would bypass the server entirely, corrupting analytics metrics and preventing instantaneous link expiration. HTTP 302 ensures the browser hits the server on every request.
 
-### Q2: How does asynchronous click tracking work and why is it important?
-> **Answer:** *"In a high-throughput URL shortener, the redirect speed is the critical user experience metric. We issue the `res.redirect(302)` response immediately, and fire `recordClickAsync()` as a detached promise with its own `.catch()` error handler. This guarantees database write latency or user-agent parsing never slows down the user's redirect."*
+### Decision 2: Asynchronous, Non-Blocking Click Analytics
+* **Rationale:** Sub-millisecond redirection is a core performance KPI. User-Agent parsing and MongoDB write operations are executed asynchronously via a decoupled promise with dedicated error handling, completely removing analytics logging from the critical redirect path.
 
-### Q3: How do you handle NanoID collisions?
-> **Answer:** *"A 7-character nanoid has over 3.5 trillion unique combinations. While probability of collision is low, we implement a defensive retry loop: we query `Url.findOne({ shortCode })`. If it exists, we generate a fresh nanoid and retry up to 5 times before failing gracefully."*
+### Decision 3: Collision-Resistant ID Generation
+* **Rationale:** A 7-character NanoID alphabet provides $\approx 3.5$ trillion combinations. A defensive retry loop checks against existing database records with a 5-iteration limit to ensure collision resistance before persisting.
 
-### Q4: How does analytics aggregation work?
-> **Answer:** *"We use MongoDB Aggregation Pipelines with `$match`, `$group`, `$sort`, and `$limit 5` stages. For clicks-per-day, we group clicks by date over the last 7 days and fill in zero-click days on the backend so charts always render continuously."*
+### Decision 4: Analytics Aggregation via MongoDB Pipelines
+* **Rationale:** Uses native MongoDB aggregation stages (`$match`, `$group`, `$sort`, `$limit`) for computing top browsers, devices, and 7-day click breakdowns, avoiding memory-heavy in-process array filtering on the Node.js event loop.
 
 ---
 
