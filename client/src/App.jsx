@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Analytics from './pages/Analytics';
 import NotFound from './pages/NotFound';
+import PokemonWalker from './components/PokemonWalker';
 
 export default function App() {
   return (
@@ -48,6 +49,9 @@ export default function App() {
           <Route path="/analytics/:id" element={<Analytics />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+
+        {/* Interactive Walking Pokémon below the main content boxes */}
+        <PokemonWalker />
       </main>
     </div>
   );

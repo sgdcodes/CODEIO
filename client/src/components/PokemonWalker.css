@@ -1,0 +1,182 @@
+.pokemon-walker-container {
+  margin: 3rem auto 1rem auto;
+  max-width: 1140px;
+  padding: 0 1rem;
+  user-select: none;
+}
+
+.pokemon-track-card {
+  position: relative;
+  overflow: hidden;
+  padding: 1.5rem 1rem 0.75rem 1rem;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.pokemon-track-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding: 0 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.pokemon-track-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.pokeball-icon {
+  width: 20px;
+  height: 20px;
+  animation: pokeballSpin 4s linear infinite;
+}
+
+@keyframes pokeballSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.pokemon-track-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-mini {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--card-border);
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-body);
+}
+
+.btn-mini:hover {
+  background: rgba(236, 72, 153, 0.25);
+  border-color: rgba(236, 72, 153, 0.4);
+  transform: translateY(-1px);
+}
+
+/* The walking field/stage */
+.pokemon-stage {
+  position: relative;
+  height: 95px;
+  border-bottom: 2px dashed rgba(236, 72, 153, 0.35);
+  overflow: hidden;
+}
+
+/* Ground glow and decorative grass/particles */
+.pokemon-ground-glow {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: linear-gradient(to top, rgba(236, 72, 153, 0.15), transparent);
+  pointer-events: none;
+}
+
+/* Individual walking Pokemon item */
+.pokemon-walker {
+  position: absolute;
+  bottom: 2px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.15s ease;
+  z-index: 5;
+}
+
+.pokemon-walker:hover {
+  filter: drop-shadow(0 0 8px rgba(244, 114, 182, 0.8));
+}
+
+.pokemon-walker.cheering {
+  animation: pokemonHop 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes pokemonHop {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-18px); }
+}
+
+/* Sprite Image */
+.pokemon-sprite {
+  image-rendering: pixelated;
+  object-fit: contain;
+  pointer-events: auto;
+  transition: transform 0.2s ease;
+}
+
+/* Speech / Cry Bubble */
+.pokemon-bubble {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.95);
+  color: #FFFFFF;
+  border: 1px solid var(--secondary);
+  border-radius: 12px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  z-index: 20;
+  animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.pokemon-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(15, 23, 42, 0.95) transparent transparent transparent;
+}
+
+@keyframes popIn {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.6); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+
+/* Berries thrown on stage */
+.berry-item {
+  position: absolute;
+  bottom: 6px;
+  font-size: 1.3rem;
+  pointer-events: none;
+  animation: berryDrop 0.4s ease-out forwards;
+  z-index: 2;
+}
+
+@keyframes berryDrop {
+  0% { transform: translateY(-50px) scale(0.4); opacity: 0; }
+  60% { transform: translateY(0) scale(1.2); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* Responsive adjustment */
+@media (max-width: 640px) {
+  .pokemon-stage {
+    height: 85px;
+  }
+}
