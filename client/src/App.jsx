@@ -53,6 +53,22 @@ export default function App() {
         {/* Interactive Walking Pokémon below the main content boxes */}
         <PokemonWalker />
       </main>
+
+      {/* Simple Footer */}
+      <footer className="footer">
+        <div className="container footer-content">
+          <span>⚡ Built with the MERN stack (MongoDB, Express, React, Node)</span>
+          <span>•</span>
+          <a
+            href="https://github.com"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="GitHub Repository"
+          >
+            GitHub Repository ↗
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }

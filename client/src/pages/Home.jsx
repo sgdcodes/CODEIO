@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { createShortUrl } from '../api/client';
+import { createShortUrl, fetchUrls } from '../api/client';
 import './Home.css';
 
 export default function Home() {
@@ -9,6 +9,29 @@ export default function Home() {
   const [expiresInDays, setExpiresInDays] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  // Global platform stats computed from existing GET /api/urls
+  const [platformStats, setPlatformStats] = useState({ totalLinks: 0, totalClicks: 0 });
+
+  const loadStats = async () => {
+    try {
+      const data = await fetchUrls();
+      if (data?.urls) {
+        const totalClicks = data.urls.reduce((acc, u) => acc + (u.clicks || 0), 0);
+        setPlatformStats({
+          totalLinks: data.urls.length,
+          totalClicks,
+        });
+      }
+    } catch {
+      // Graceful fallback if offline or backend cold start
+    }
+  };
+
+  useEffect(() => {
+    loadStats();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,10 +51,11 @@ export default function Home() {
 
       setResult(data);
       toast.success('Short link generated successfully!');
-      // Clear inputs
+      // Reset inputs & refresh platform stats
       setOriginalUrl('');
       setCustomAlias('');
       setExpiresInDays('');
+      loadStats();
     } catch (err) {
       const errorMessage =
         err.response?.data?.message || err.message || 'Failed to shorten URL';
@@ -41,9 +65,14 @@ export default function Home() {
     }
   };
 
+  // Copy to clipboard with 2-second temporary "Copied ✓" state
   const handleCopy = (text) => {
     navigator.clipboard.writeText(text);
-    toast.success('Copied!');
+    setCopied(true);
+    toast.success('Copied to clipboard!');
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
   };
 
   return (
@@ -57,6 +86,32 @@ export default function Home() {
           Transform long, cumbersome URLs into clean, lightning-fast short links
           with custom aliases and real-time deep click analytics.
         </p>
+
+        {/* Feature Chips */}
+        <div className="feature-chips">
+          <span className="feature-chip">
+            <span className="chip-dot" /> 100% Free
+          </span>
+          <span className="feature-chip">
+            <span className="chip-dot" /> Click Analytics
+          </span>
+          <span className="feature-chip">
+            <span className="chip-dot" /> Custom Aliases
+          </span>
+        </div>
+
+        {/* Live Platform Stats Strip */}
+        <div className="stats-strip">
+          <div className="stats-strip-item">
+            <span>🔗 Total Links:</span>
+            <span className="stats-strip-num">{platformStats.totalLinks}</span>
+          </div>
+          <span className="stats-divider">•</span>
+          <div className="stats-strip-item">
+            <span>🖱️ Total Clicks:</span>
+            <span className="stats-strip-num">{platformStats.totalClicks}</span>
+          </div>
+        </div>
       </section>
 
       {/* Shorten Form Card */}
@@ -118,9 +173,9 @@ export default function Home() {
         </form>
       </div>
 
-      {/* Result Card */}
+      {/* Result Card with Slide-In Animation */}
       {result && (
-        <div className="glass-card result-card fade-in">
+        <div className="glass-card result-card slide-in">
           <div className="result-header">
             <h3>✨ Your Short Link is Ready!</h3>
             <span className="badge badge-active">Active</span>
@@ -134,7 +189,7 @@ export default function Home() {
                 className="btn btn-secondary"
                 onClick={() => handleCopy(result.shortUrl)}
               >
-                📋 Copy
+                {copied ? 'Copied ✓' : '📋 Copy'}
               </button>
               <a
                 href={result.shortUrl}

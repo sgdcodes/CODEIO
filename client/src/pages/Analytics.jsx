@@ -3,15 +3,21 @@ import { useParams, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   ResponsiveContainer,
-  AreaChart,
-  Area,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
   CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts';
 import { fetchAnalytics } from '../api/client';
 import './Analytics.css';
+
+// Vibrant palette for donut charts
+const DONUT_COLORS = ['#8B5CF6', '#EC4899', '#F97316', '#10B981', '#38BDF8', '#F59E0B'];
 
 export default function Analytics() {
   const { id } = useParams();
@@ -24,7 +30,7 @@ export default function Analytics() {
         setLoading(true);
         const report = await fetchAnalytics(id);
         setData(report);
-      } catch (err) {
+      } catch {
         toast.error('Failed to load analytics for this link');
       } finally {
         setLoading(false);
@@ -55,6 +61,11 @@ export default function Analytics() {
     );
   }
 
+  // Determine badge for current status
+  const isExpired =
+    data.status === 'expired' ||
+    (data.expiresAt && new Date(data.expiresAt) <= new Date());
+
   return (
     <div className="container">
       {/* Top Header */}
@@ -66,7 +77,9 @@ export default function Analytics() {
               color: 'var(--text-muted)',
               textDecoration: 'none',
               fontSize: '0.9rem',
-              display: 'inline-block',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3rem',
               marginBottom: '0.5rem',
             }}
           >
@@ -86,122 +99,237 @@ export default function Analytics() {
           rel="noreferrer"
           className="btn btn-secondary"
         >
-          Visit Link ↗
+          <span>🚀</span>
+          <span>Visit Short Link ↗</span>
         </a>
       </div>
 
-      {/* Key Metric Cards */}
+      {/* Colorful Stat Cards with Emojis */}
       <div className="stats-grid fade-in">
-        <div className="glass-card stat-card">
-          <span className="stat-title">Total Clicks</span>
-          <span className="stat-value gradient-text">{data.totalClicks}</span>
+        {/* Total Clicks */}
+        <div className="glass-card stat-card stat-card-clicks">
+          <div className="stat-icon-bubble">🖱️</div>
+          <div className="stat-content">
+            <span className="stat-title">Total Clicks</span>
+            <span className="stat-value gradient-text">{data.totalClicks || 0}</span>
+          </div>
         </div>
 
-        <div className="glass-card stat-card">
-          <span className="stat-title">Current Status</span>
-          <span className="stat-value" style={{ fontSize: '1.4rem', textTransform: 'capitalize' }}>
-            <span
-              className={`badge ${
-                data.status === 'expired' ? 'badge-expired' : 'badge-active'
-              }`}
-            >
-              {data.status}
+        {/* Current Status */}
+        <div className="glass-card stat-card stat-card-status">
+          <div className="stat-icon-bubble">⚡</div>
+          <div className="stat-content">
+            <span className="stat-title">Current Status</span>
+            <div style={{ marginTop: '0.35rem' }}>
+              <span className={`badge ${isExpired ? 'badge-expired' : 'badge-active'}`}>
+                {isExpired ? 'Expired' : 'Active'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Created Date */}
+        <div className="glass-card stat-card stat-card-created">
+          <div className="stat-icon-bubble">📅</div>
+          <div className="stat-content">
+            <span className="stat-title">Created Date</span>
+            <span className="stat-value" style={{ fontSize: '1.25rem' }}>
+              {new Date(data.createdAt).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              })}
             </span>
-          </span>
+          </div>
         </div>
 
-        <div className="glass-card stat-card">
-          <span className="stat-title">Created Date</span>
-          <span className="stat-value" style={{ fontSize: '1.2rem' }}>
-            {new Date(data.createdAt).toLocaleDateString()}
-          </span>
-        </div>
-
-        <div className="glass-card stat-card">
-          <span className="stat-title">Expires On</span>
-          <span className="stat-value" style={{ fontSize: '1.2rem' }}>
-            {data.expiresAt
-              ? new Date(data.expiresAt).toLocaleDateString()
-              : 'Never'}
-          </span>
+        {/* Expires On */}
+        <div className="glass-card stat-card stat-card-expires">
+          <div className="stat-icon-bubble">⏳</div>
+          <div className="stat-content">
+            <span className="stat-title">Expires On</span>
+            <span className="stat-value" style={{ fontSize: '1.25rem' }}>
+              {data.expiresAt
+                ? new Date(data.expiresAt).toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  })
+                : 'Never'}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* 7-Day Clicks Chart */}
+      {/* 7-Day Clicks Bar Chart with Gradient Fills & Rounded Corners */}
       <div className="glass-card chart-card fade-in">
-        <h3 className="chart-title">📈 Clicks in the Last 7 Days</h3>
+        <h3 className="chart-title">📊 Clicks in the Last 7 Days</h3>
         <div className="chart-wrapper">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data.clicksPerDay} margin={{ top: 10, right: 20, left: -20, bottom: 0 }}>
+            <BarChart
+              data={data.clicksPerDay}
+              margin={{ top: 15, right: 20, left: -20, bottom: 0 }}
+            >
               <defs>
-                <linearGradient id="clickGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#EC4899" stopOpacity={0.6} />
-                  <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.0} />
+                <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#EC4899" stopOpacity={0.95} />
+                  <stop offset="100%" stopColor="#8B5CF6" stopOpacity={0.7} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="rgba(255, 255, 255, 0.08)"
+                vertical={false}
+              />
               <XAxis
                 dataKey="date"
                 stroke="#94A3B8"
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: '#CBD5E1' }}
                 tickFormatter={(val) => val.slice(5)} // Show MM-DD
               />
-              <YAxis allowDecimals={false} stroke="#94A3B8" tick={{ fontSize: 12 }} />
+              <YAxis
+                allowDecimals={false}
+                stroke="#94A3B8"
+                tick={{ fontSize: 12, fill: '#CBD5E1' }}
+              />
               <Tooltip
+                cursor={{ fill: 'rgba(255, 255, 255, 0.04)' }}
                 contentStyle={{
-                  backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                  borderColor: 'rgba(236, 72, 153, 0.4)',
+                  backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                  borderColor: 'rgba(236, 72, 153, 0.45)',
                   borderRadius: '10px',
                   color: '#FFFFFF',
                   boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)',
                 }}
               />
-              <Area
-                type="monotone"
+              <Bar
                 dataKey="clicks"
-                stroke="#F472B6"
-                strokeWidth={3}
-                fillOpacity={1}
-                fill="url(#clickGrad)"
+                fill="url(#barGrad)"
+                radius={[8, 8, 0, 0]}
+                maxBarSize={48}
               />
-            </AreaChart>
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Breakdown Metrics Grid */}
+      {/* Breakdown Metrics Grid (Donut Charts + Referrers) */}
       <div className="breakdown-grid fade-in">
-        {/* Top Browsers */}
+        {/* Top Browsers Donut Chart */}
         <div className="glass-card breakdown-card">
           <h3>🌐 Top Browsers</h3>
           {data.topBrowsers.length === 0 ? (
             <div className="empty-breakdown">No clicks tracked yet</div>
           ) : (
-            <ul className="breakdown-list">
-              {data.topBrowsers.map((item, idx) => (
-                <li key={idx} className="breakdown-item">
-                  <span className="breakdown-name">{item.name}</span>
-                  <span className="breakdown-count">{item.count}</span>
-                </li>
-              ))}
-            </ul>
+            <>
+              <div className="donut-wrapper">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={data.topBrowsers}
+                      dataKey="count"
+                      nameKey="name"
+                      innerRadius={50}
+                      outerRadius={75}
+                      paddingAngle={4}
+                    >
+                      {data.topBrowsers.map((entry, index) => (
+                        <Cell
+                          key={`cell-browser-${index}`}
+                          fill={DONUT_COLORS[index % DONUT_COLORS.length]}
+                          stroke="rgba(15, 23, 42, 0.8)"
+                          strokeWidth={2}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderRadius: '8px',
+                        color: '#FFFFFF',
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              <ul className="breakdown-list">
+                {data.topBrowsers.map((item, idx) => (
+                  <li key={idx} className="breakdown-item">
+                    <div className="breakdown-item-left">
+                      <span
+                        className="breakdown-dot"
+                        style={{
+                          backgroundColor: DONUT_COLORS[idx % DONUT_COLORS.length],
+                        }}
+                      />
+                      <span className="breakdown-name">{item.name}</span>
+                    </div>
+                    <span className="breakdown-count">{item.count}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </div>
 
-        {/* Top Devices */}
+        {/* Top Devices Donut Chart */}
         <div className="glass-card breakdown-card">
           <h3>📱 Top Devices</h3>
           {data.topDevices.length === 0 ? (
             <div className="empty-breakdown">No clicks tracked yet</div>
           ) : (
-            <ul className="breakdown-list">
-              {data.topDevices.map((item, idx) => (
-                <li key={idx} className="breakdown-item">
-                  <span className="breakdown-name">{item.name}</span>
-                  <span className="breakdown-count">{item.count}</span>
-                </li>
-              ))}
-            </ul>
+            <>
+              <div className="donut-wrapper">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={data.topDevices}
+                      dataKey="count"
+                      nameKey="name"
+                      innerRadius={50}
+                      outerRadius={75}
+                      paddingAngle={4}
+                    >
+                      {data.topDevices.map((entry, index) => (
+                        <Cell
+                          key={`cell-device-${index}`}
+                          fill={DONUT_COLORS[index % DONUT_COLORS.length]}
+                          stroke="rgba(15, 23, 42, 0.8)"
+                          strokeWidth={2}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderRadius: '8px',
+                        color: '#FFFFFF',
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              <ul className="breakdown-list">
+                {data.topDevices.map((item, idx) => (
+                  <li key={idx} className="breakdown-item">
+                    <div className="breakdown-item-left">
+                      <span
+                        className="breakdown-dot"
+                        style={{
+                          backgroundColor: DONUT_COLORS[idx % DONUT_COLORS.length],
+                        }}
+                      />
+                      <span className="breakdown-name">{item.name}</span>
+                    </div>
+                    <span className="breakdown-count">{item.count}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </div>
 
@@ -211,10 +339,18 @@ export default function Analytics() {
           {data.topReferrers.length === 0 ? (
             <div className="empty-breakdown">No clicks tracked yet</div>
           ) : (
-            <ul className="breakdown-list">
+            <ul className="breakdown-list" style={{ marginTop: '0.5rem' }}>
               {data.topReferrers.map((item, idx) => (
                 <li key={idx} className="breakdown-item">
-                  <span className="breakdown-name">{item.name}</span>
+                  <div className="breakdown-item-left">
+                    <span
+                      className="breakdown-dot"
+                      style={{
+                        backgroundColor: DONUT_COLORS[idx % DONUT_COLORS.length],
+                      }}
+                    />
+                    <span className="breakdown-name">{item.name}</span>
+                  </div>
                   <span className="breakdown-count">{item.count}</span>
                 </li>
               ))}
