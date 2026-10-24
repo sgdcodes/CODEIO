@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: linkvault-backend
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5001
+      - key: MONGODB_URI
+        sync: false          # you will paste this in Render dashboard
+      - key: CLIENT_URL
+        sync: false          # paste your Vercel frontend URL in Render dashboard
+      - key: BASE_URL
+        sync: false          # paste your Render backend URL after first deploy

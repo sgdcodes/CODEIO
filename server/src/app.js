@@ -11,16 +11,28 @@ const app = express();
 app.use(helmet());
 
 // Cross-Origin Resource Sharing setup
-const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'http://localhost:5173',
+  'http://localhost:5173',
+  'http://localhost:5174',
+];
+// Also allow any Vercel preview/production subdomain for this project
+const vercelPattern = /^https:\/\/.*\.vercel\.app$/;
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile, curl, Postman) or matching frontend
-      if (!origin || origin === clientUrl || process.env.NODE_ENV !== 'production') {
-        callback(null, true);
-      } else {
-        callback(new Error('Blocked by CORS policy'));
+      // Allow requests with no origin (mobile apps, curl, Postman)
+      if (!origin) return callback(null, true);
+      // Allow whitelisted origins or any Vercel subdomain
+      if (allowedOrigins.includes(origin) || vercelPattern.test(origin)) {
+        return callback(null, true);
       }
+      // In development, allow everything
+      if (process.env.NODE_ENV !== 'production') {
+        return callback(null, true);
+      }
+      callback(new Error('Blocked by CORS policy'));
     },
     credentials: true,
   })
