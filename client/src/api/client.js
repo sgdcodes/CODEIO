@@ -1,7 +1,10 @@
 import axios from 'axios';
 
 // Base backend URL from Vite environment variables (if provided)
-const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL
+  ? import.meta.env.VITE_API_URL
+  : ''
+).replace(/\/$/, '');
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL || undefined,
@@ -17,6 +20,25 @@ const apiClient = axios.create({
 // ==========================================
 const STORAGE_KEY_URLS = 'linkvault_demo_urls';
 const STORAGE_KEY_CLICKS = 'linkvault_demo_clicks';
+
+const memoryStore = {};
+const getStorage = () => {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      // test write access (handles Safari incognito restrictions)
+      window.localStorage.setItem('__linkvault_test__', '1');
+      window.localStorage.removeItem('__linkvault_test__');
+      return window.localStorage;
+    }
+  } catch {
+    // fallback to memory
+  }
+  return {
+    getItem: (k) => memoryStore[k] || null,
+    setItem: (k, v) => { memoryStore[k] = String(v); },
+    removeItem: (k) => { delete memoryStore[k]; },
+  };
+};
 
 const getOrigin = () => {
   if (typeof window !== 'undefined' && window.location?.origin) {
@@ -64,10 +86,11 @@ const getSeedUrls = () => [
 
 const getLocalUrls = () => {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY_URLS);
+    const storage = getStorage();
+    const raw = storage.getItem(STORAGE_KEY_URLS);
     if (!raw) {
       const seed = getSeedUrls();
-      localStorage.setItem(STORAGE_KEY_URLS, JSON.stringify(seed));
+      storage.setItem(STORAGE_KEY_URLS, JSON.stringify(seed));
       return seed;
     }
     const parsed = JSON.parse(raw);
@@ -83,15 +106,15 @@ const getLocalUrls = () => {
 
 const saveLocalUrls = (urls) => {
   try {
-    localStorage.setItem(STORAGE_KEY_URLS, JSON.stringify(urls));
+    getStorage().setItem(STORAGE_KEY_URLS, JSON.stringify(urls));
   } catch (err) {
-    console.error('Failed to save to localStorage:', err);
+    console.error('Failed to save to storage:', err);
   }
 };
 
 const getLocalClicks = () => {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY_CLICKS);
+    const raw = getStorage().getItem(STORAGE_KEY_CLICKS);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
@@ -100,9 +123,9 @@ const getLocalClicks = () => {
 
 const saveLocalClicks = (clicks) => {
   try {
-    localStorage.setItem(STORAGE_KEY_CLICKS, JSON.stringify(clicks));
+    getStorage().setItem(STORAGE_KEY_CLICKS, JSON.stringify(clicks));
   } catch (err) {
-    console.error('Failed to save clicks to localStorage:', err);
+    console.error('Failed to save clicks to storage:', err);
   }
 };
 
