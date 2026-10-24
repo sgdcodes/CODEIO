@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Analytics from './pages/Analytics';
+import RedirectHandler from './pages/RedirectHandler';
 import NotFound from './pages/NotFound';
 import PokemonWalker from './components/PokemonWalker';
 import BackgroundPaths from './components/BackgroundPaths';
@@ -52,6 +53,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/analytics/:id" element={<Analytics />} />
+            <Route path="/:shortCode" element={<RedirectHandler />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
