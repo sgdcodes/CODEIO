@@ -18,8 +18,9 @@ const allowedOrigins = [
   'http://localhost:5174',
 ].filter(Boolean);
 
-// Also allow any Vercel preview/production subdomain for this project
+// Also allow any Vercel preview/production subdomain or Cloudflare tunnels
 const vercelPattern = /^https:\/\/.*\.vercel\.app$/;
+const tunnelPattern = /^https:\/\/.*\.trycloudflare\.com$/;
 
 app.use(
   cors({
@@ -30,8 +31,8 @@ app.use(
       if (process.env.NODE_ENV !== 'production') {
         return callback(null, true);
       }
-      // Allow whitelisted origins or any Vercel subdomain
-      if (allowedOrigins.includes(origin) || vercelPattern.test(origin)) {
+      // Allow whitelisted origins, Vercel subdomains, or tunnels
+      if (allowedOrigins.includes(origin) || vercelPattern.test(origin) || tunnelPattern.test(origin)) {
         return callback(null, true);
       }
       callback(null, false);
