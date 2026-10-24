@@ -8,8 +8,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 5001
       - key: MONGODB_URI
         sync: false          # you will paste this in Render dashboard
       - key: CLIENT_URL

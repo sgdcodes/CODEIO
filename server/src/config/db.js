@@ -5,7 +5,7 @@ let memoryServer = null;
 // Connect to MongoDB (MongoDB Atlas, local MongoDB daemon, or in-memory fallback)
 const connectDB = async () => {
   try {
-    const mongoUri = process.env.MONGO_URI;
+    const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
 
     // If a dedicated Atlas or remote URI is provided, connect to it
     if (mongoUri && !mongoUri.includes('localhost') && !mongoUri.includes('127.0.0.1')) {
