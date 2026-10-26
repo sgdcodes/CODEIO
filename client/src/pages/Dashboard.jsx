@@ -414,10 +414,16 @@ export default function Dashboard() {
                 <label className="form-label">Change Passcode (Leave empty to keep current)</label>
                 <input
                   type="text"
+                  name="link-lock-code"
                   className="form-input"
                   placeholder="New passcode or empty to keep"
                   value={editPasscode}
                   onChange={(e) => setEditPasscode(e.target.value)}
+                  autoComplete="off"
+                  data-1p-ignore
+                  data-lpignore="true"
+                  data-bwignore
+                  data-form-type="other"
                 />
               </div>
 

@@ -163,10 +163,16 @@ export default function Home() {
             <label className="form-label">Passcode Protection 🔒 (Optional)</label>
             <input
               type="text"
+              name="link-lock-code"
               className="form-input"
-              placeholder="e.g. 1234 or secretKey (Leave empty for public link)"
+              placeholder="e.g. 1234 (leave empty for a public link)"
               value={passcode}
               onChange={(e) => setPasscode(e.target.value)}
+              autoComplete="off"
+              data-1p-ignore
+              data-lpignore="true"
+              data-bwignore
+              data-form-type="other"
             />
           </div>
 
@@ -245,6 +251,7 @@ export default function Home() {
                   ⚡ Supercharged Link
                 </span>
               )}
+              {result.isProtected && <span className="badge badge-expiring">🔒 Passcode</span>}
               <span className="badge badge-active">Active</span>
             </div>
           </div>
