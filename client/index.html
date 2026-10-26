@@ -1,20 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LinkVault — URL Shortener</title>
-    <script>
-      (function () {
-        var theme;
-        try { theme = localStorage.getItem('linkvault_theme'); } catch (e) {}
-        if (theme !== 'light' && theme !== 'dark') {
-          theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-        }
-        document.documentElement.dataset.theme = theme;
-      })();
-    </script>
     <meta name="description" content="Transform long URLs into clean short links with custom aliases, auto-expiry, and real-time analytics. Powered by LinkVault." />
 
     <!-- Open Graph / Social Media Preview -->
