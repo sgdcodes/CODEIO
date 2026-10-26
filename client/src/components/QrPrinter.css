@@ -1,0 +1,283 @@
+.qrp {
+  --qrp-body-top: #2f3036;
+  --qrp-body-bottom: #16161a;
+  --qrp-border: rgba(255, 255, 255, 0.12);
+  --qrp-highlight: rgba(255, 255, 255, 0.14);
+  --qrp-shadow: 0 12px 28px rgba(0, 0, 0, 0.55), 0 2px 4px rgba(0, 0, 0, 0.4);
+  --qrp-text: #b0b0b8;
+  --qrp-vent: rgba(0, 0, 0, 0.5);
+  --qrp-slot: #050505;
+  --qrp-paper-shadow: rgba(0, 0, 0, 0.5);
+  --qrp-lip: #0c0c0e;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  user-select: none;
+}
+
+:root[data-theme='light'] .qrp {
+  --qrp-body-top: #f4f1ec;
+  --qrp-body-bottom: #d8d3cc;
+  --qrp-border: rgba(15, 17, 21, 0.16);
+  --qrp-highlight: rgba(255, 255, 255, 0.85);
+  --qrp-shadow: 0 12px 24px rgba(15, 17, 21, 0.14), 0 2px 4px rgba(15, 17, 21, 0.08);
+  --qrp-text: #5c616a;
+  --qrp-vent: rgba(15, 17, 21, 0.16);
+  --qrp-slot: #2a2a2e;
+  --qrp-paper-shadow: rgba(15, 17, 21, 0.2);
+  --qrp-lip: #3a3a40;
+}
+
+/* ---------- Machine ---------- */
+.qrp-machine {
+  position: relative;
+  z-index: 2;
+  width: 236px;
+  padding: 0.65rem 0.75rem 0;
+  border-radius: 14px 14px 6px 6px;
+  background: linear-gradient(180deg, var(--qrp-body-top) 0%, var(--qrp-body-bottom) 100%);
+  border: 1px solid var(--qrp-border);
+  box-shadow: inset 0 1px 0 var(--qrp-highlight), var(--qrp-shadow);
+}
+
+.qrp-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--qrp-text);
+}
+
+.qrp-model {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 600;
+}
+
+.qrp-status {
+  margin-left: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.qrp-led {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.8);
+  animation: qrp-blink 0.9s steps(2, end) infinite;
+}
+
+.qrp[data-state='printing'] .qrp-led {
+  background: #ff810a;
+  box-shadow: 0 0 8px rgba(255, 129, 10, 0.9);
+  animation-duration: 0.22s;
+}
+
+.qrp[data-state='done'] .qrp-led {
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
+  animation: none;
+}
+
+.qrp[data-state='error'] .qrp-led {
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+  animation: none;
+}
+
+.qrp-vents {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin: 0.5rem 0 0.5rem;
+}
+
+.qrp-vents span {
+  width: 26px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--qrp-vent);
+}
+
+.qrp-slot {
+  position: relative;
+  height: 10px;
+  margin: 0 -0.15rem;
+  border-radius: 3px 3px 0 0;
+  background: var(--qrp-slot);
+  box-shadow: inset 0 3px 4px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+}
+
+.qrp-slot::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--qrp-lip);
+}
+
+.qrp-head {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 3px;
+  height: 2px;
+  border-radius: 2px;
+  background: #ff810a;
+  opacity: 0;
+}
+
+.qrp[data-state='printing'] .qrp-head {
+  animation: qrp-head 0.32s ease-in-out infinite alternate;
+}
+
+.qrp[data-state='printing'] .qrp-machine {
+  animation: qrp-buzz 0.12s linear infinite;
+}
+
+/* ---------- Paper: clip grows downward so the QR (top) exits the slot first ---------- */
+.qrp-feed {
+  position: relative;
+  z-index: 1;
+  width: 196px;
+  height: 0;
+  overflow: hidden;
+  filter: drop-shadow(0 8px 10px var(--qrp-paper-shadow));
+}
+
+.qrp[data-state='printing'] .qrp-feed {
+  animation: qrp-reveal 2.35s cubic-bezier(0.45, 0, 0.55, 1) forwards;
+}
+
+.qrp[data-state='done'] .qrp-feed,
+.qrp[data-state='error'] .qrp-feed {
+  height: 228px;
+}
+
+.qrp-paper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  width: 196px;
+  height: 220px;
+  padding: 0.65rem 0.65rem 1.05rem;
+  background: #ffffff;
+  background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.08), transparent 12px);
+  overflow: hidden;
+}
+
+.qrp-paper::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 10px;
+  background: repeating-conic-gradient(#fff 0 90deg, transparent 0 180deg) 0 0 / 10px 10px;
+  pointer-events: none;
+}
+
+.qrp-code {
+  display: block;
+  width: 168px;
+  height: 168px;
+  image-rendering: auto;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.qrp-caption {
+  max-width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+  color: #3b3b3b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qrp-scan {
+  display: none;
+}
+
+/* ---------- Actions ---------- */
+.qrp-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.qrp-actions .btn {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.82rem;
+}
+
+.qrp-hint {
+  margin-top: 0.45rem;
+  font-size: 0.75rem;
+  color: var(--text-subtle);
+  text-align: center;
+  max-width: 236px;
+}
+
+@keyframes qrp-blink {
+  50% { opacity: 0.25; }
+}
+
+@keyframes qrp-head {
+  from { opacity: 0.3; }
+  to { opacity: 1; box-shadow: 0 0 10px 2px rgba(255, 129, 10, 0.85); }
+}
+
+@keyframes qrp-buzz {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-0.5px); }
+  75% { transform: translateX(0.5px); }
+}
+
+@keyframes qrp-reveal {
+  0%   { height: 0; }
+  12%  { height: 36px; }
+  18%  { height: 36px; }
+  34%  { height: 88px; }
+  40%  { height: 88px; }
+  56%  { height: 140px; }
+  62%  { height: 140px; }
+  80%  { height: 196px; }
+  86%  { height: 196px; }
+  100% { height: 228px; }
+}
+
+@keyframes qrp-settle {
+  0%   { transform: rotate(0deg); }
+  35%  { transform: rotate(1.4deg); }
+  70%  { transform: rotate(-0.8deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes qrp-glint {
+  to { transform: translateX(120%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qrp-led,
+  .qrp-head,
+  .qrp-machine,
+  .qrp-feed,
+  .qrp-paper,
+  .qrp-scan {
+    animation: none !important;
+  }
+  .qrp-feed {
+    height: 228px;
+  }
+}

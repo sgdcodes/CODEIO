@@ -5,6 +5,7 @@ import {
   deleteUrl,
   updateUrl,
   getAnalytics,
+  getQrCode,
 } from '../controllers/urlController.js';
 import { shortenLimiter } from '../middleware/rateLimiter.js';
 
@@ -24,5 +25,8 @@ router.patch('/:id', updateUrl);
 
 // GET /api/urls/:id/analytics - Get analytics report for a URL
 router.get('/:id/analytics', getAnalytics);
+
+// GET /api/urls/:id/qr - QR code for the short URL (?format=svg|png|json)
+router.get('/:id/qr', getQrCode);
 
 export default router;

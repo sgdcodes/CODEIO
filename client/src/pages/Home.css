@@ -186,6 +186,11 @@
   background: rgba(255, 129, 10, 0.06);
 }
 
+.result-card:hover {
+  transform: none;
+  box-shadow: var(--shadow-glass);
+}
+
 .result-header {
   display: flex;
   align-items: center;
@@ -235,6 +240,38 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+
+.result-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.result-details {
+  min-width: 0;
+}
+
+.result-meta span {
+  word-break: break-all;
+}
+
+.result-qr {
+  padding-left: 1.5rem;
+  border-left: 1px solid var(--divider);
+}
+
+@media (max-width: 720px) {
+  .result-body {
+    grid-template-columns: 1fr;
+  }
+  .result-qr {
+    padding-left: 0;
+    padding-top: 1.25rem;
+    border-left: none;
+    border-top: 1px solid var(--divider);
+  }
 }
 
 .result-meta span strong {

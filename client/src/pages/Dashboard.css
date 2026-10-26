@@ -22,6 +22,49 @@
   box-shadow: var(--shadow-modal);
 }
 
+.qr-modal {
+  max-width: 340px;
+}
+
+.qr-modal:hover {
+  transform: none;
+  box-shadow: var(--shadow-modal);
+}
+
+@media (max-width: 400px) {
+  .qr-modal {
+    max-width: 100%;
+    padding: 1.2rem 0.9rem;
+  }
+}
+
+.qr-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.18rem 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid var(--card-border);
+  background: var(--tint);
+  color: var(--text-main);
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.qr-chip:hover {
+  background: var(--tint-strong);
+  border-color: var(--tint-border);
+}
+
+.qr-chip svg {
+  width: 12px;
+  height: 12px;
+}
+
 .modal-header {
   display: flex;
   align-items: center;

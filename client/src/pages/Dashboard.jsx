@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { fetchUrls, deleteShortUrl, updateShortUrl } from '../api/client';
+import QrPrinter from '../components/QrPrinter';
 import './Dashboard.css';
 
 export default function Dashboard() {
@@ -16,6 +17,17 @@ export default function Dashboard() {
   const [editExpiry, setEditExpiry] = useState('');
   const [editPasscode, setEditPasscode] = useState('');
   const [savingEdit, setSavingEdit] = useState(false);
+
+  const [qrItem, setQrItem] = useState(null);
+
+  useEffect(() => {
+    if (!qrItem) return undefined;
+    const onKey = (e) => {
+      if (e.key === 'Escape') setQrItem(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [qrItem]);
 
   // Search & Sort state
   const [searchQuery, setSearchQuery] = useState('');
@@ -281,13 +293,28 @@ export default function Dashboard() {
                         </span>
                       )}
                       <span className={`badge ${badge.className}`}>{badge.text}</span>
+                      <button
+                        type="button"
+                        className="qr-chip"
+                        onClick={() => setQrItem(item)}
+                        title="Show QR code"
+                        aria-label={`Show QR code for /${item.shortCode}`}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                          <rect x="3" y="3" width="7" height="7" rx="1" />
+                          <rect x="14" y="3" width="7" height="7" rx="1" />
+                          <rect x="3" y="14" width="7" height="7" rx="1" />
+                          <path strokeLinecap="round" d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3" />
+                        </svg>
+                        QR
+                      </button>
                     </div>
                   </div>
 
                   {/* Clickable Full Short URL */}
                   <div className="link-card-full-url">
                     <a href={item.shortUrl} target="_blank" rel="noreferrer">
-                      {item.shortUrl}
+                      /{item.shortCode}
                     </a>
                   </div>
 
@@ -365,6 +392,32 @@ export default function Dashboard() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* QR Code Modal */}
+      {qrItem && (
+        <div className="modal-backdrop" onClick={() => setQrItem(null)}>
+          <div
+            className="glass-card modal-box qr-modal slide-in"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`QR code for /${qrItem.shortCode}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <h3>QR code for /{qrItem.shortCode}</h3>
+              <button
+                type="button"
+                className="modal-close"
+                onClick={() => setQrItem(null)}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+            <QrPrinter key={qrItem._id} link={qrItem} />
+          </div>
         </div>
       )}
 

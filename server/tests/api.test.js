@@ -1,12 +1,16 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import jsQR from 'jsqr';
+import { PNG } from 'pngjs';
 import app from '../src/app.js';
 import Url from '../src/models/Url.js';
 
 let mongoServer;
 
 beforeAll(async () => {
+  // supertest binds a new random port per request, so pin the host used in short URLs
+  process.env.BASE_URL = 'https://lnk.test';
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
   await mongoose.connect(uri);
@@ -93,6 +97,69 @@ describe('LinkVault API Unit & Integration Tests', () => {
       expect(updateRes.status).toBe(200);
       expect(updateRes.body.url.originalUrl).toBe('https://updated-site.com');
       expect(updateRes.body.url.expiresAt).not.toBeNull();
+    });
+  });
+
+  describe('QR codes', () => {
+    const decodePng = (buffer) => {
+      const png = PNG.sync.read(buffer);
+      return jsQR(new Uint8ClampedArray(png.data), png.width, png.height)?.data;
+    };
+
+    it('should return a QR data URL when a link is created', async () => {
+      const res = await request(app)
+        .post('/api/urls')
+        .send({ originalUrl: 'https://example.com/qr', customAlias: 'qr-create' });
+
+      expect(res.status).toBe(201);
+      expect(res.body.qrCode).toMatch(/^data:image\/svg\+xml;base64,/);
+      const svg = Buffer.from(res.body.qrCode.split(',')[1], 'base64').toString();
+      expect(svg).toContain('<svg');
+    });
+
+    it('should encode the short URL in the PNG', async () => {
+      const createRes = await request(app)
+        .post('/api/urls')
+        .send({ originalUrl: 'https://example.com/scan-me', customAlias: 'scan-me' });
+
+      const res = await request(app)
+        .get(`/api/urls/${createRes.body._id}/qr?format=png`)
+        .buffer(true)
+        .parse((response, cb) => {
+          const chunks = [];
+          response.on('data', (c) => chunks.push(c));
+          response.on('end', () => cb(null, Buffer.concat(chunks)));
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.headers['content-type']).toMatch(/image\/png/);
+      expect(decodePng(res.body)).toBe(createRes.body.shortUrl);
+    });
+
+    it('should serve SVG by default and JSON on request', async () => {
+      const createRes = await request(app)
+        .post('/api/urls')
+        .send({ originalUrl: 'https://example.com/formats' });
+      const id = createRes.body._id;
+
+      const svgRes = await request(app).get(`/api/urls/${id}/qr`);
+      expect(svgRes.status).toBe(200);
+      expect(svgRes.headers['content-type']).toMatch(/image\/svg\+xml/);
+
+      const jsonRes = await request(app).get(`/api/urls/${id}/qr?format=json`);
+      expect(jsonRes.status).toBe(200);
+      expect(jsonRes.body.shortUrl).toBe(createRes.body.shortUrl);
+      expect(jsonRes.body.qrCode).toMatch(/^data:image\/svg\+xml;base64,/);
+    });
+
+    it('should reject bad ids, unknown links and unknown formats', async () => {
+      const createRes = await request(app)
+        .post('/api/urls')
+        .send({ originalUrl: 'https://example.com/errors' });
+
+      expect((await request(app).get('/api/urls/not-an-id/qr')).status).toBe(400);
+      expect((await request(app).get(`/api/urls/${new mongoose.Types.ObjectId()}/qr`)).status).toBe(404);
+      expect((await request(app).get(`/api/urls/${createRes.body._id}/qr?format=gif`)).status).toBe(400);
     });
   });
 

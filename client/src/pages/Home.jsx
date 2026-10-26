@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { createShortUrl, fetchUrls } from '../api/client';
+import QrPrinter from '../components/QrPrinter';
 import './Home.css';
 
 export default function Home() {
@@ -257,7 +258,7 @@ export default function Home() {
           </div>
 
           <div className="result-link-box">
-            <span className="short-url-text">{result.shortUrl}</span>
+            <span className="short-url-text">/{result.shortCode}</span>
             <div className="result-actions">
               <button
                 type="button"
@@ -277,38 +278,46 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="result-meta">
-            <span>
-              <strong>Target:</strong> {result.originalUrl} ({result.originalUrl.length} chars)
-            </span>
-            <span>
-              <strong>Short Link:</strong> {result.shortUrl.length} chars
-            </span>
-            {result.expiresAt && (
-              <span>
-                <strong>Expires On:</strong>{' '}
-                {new Date(result.expiresAt).toLocaleDateString()} at{' '}
-                {new Date(result.expiresAt).toLocaleTimeString()}
-              </span>
-            )}
-          </div>
+          <div className="result-body">
+            <div className="result-details">
+              <div className="result-meta">
+                <span>
+                  <strong>Target:</strong> {result.originalUrl} ({result.originalUrl.length} chars)
+                </span>
+                <span>
+                  <strong>Short Link:</strong> {result.shortUrl.length} chars
+                </span>
+                {result.expiresAt && (
+                  <span>
+                    <strong>Expires On:</strong>{' '}
+                    {new Date(result.expiresAt).toLocaleDateString()} at{' '}
+                    {new Date(result.expiresAt).toLocaleTimeString()}
+                  </span>
+                )}
+              </div>
 
-          {result.originalUrl.length <= result.shortUrl.length && (
-            <div
-              style={{
-                marginTop: '0.85rem',
-                fontSize: '0.82rem',
-                color: 'var(--text-muted)',
-                background: 'var(--tint)',
-                border: '1px solid var(--divider)',
-                padding: '0.6rem 0.85rem',
-                borderRadius: '8px',
-                lineHeight: 1.5,
-              }}
-            >
-              💡 <strong>Pro-Tip:</strong> The destination URL is already ultra-short ({result.originalUrl.length} chars). URL shorteners deliver the biggest character reduction on long links (100–300+ chars like Amazon or YouTube links with query params), while shorter links gain <strong>click analytics, passcode protection, and auto-expiry</strong>!
+              {result.originalUrl.length <= result.shortUrl.length && (
+                <div
+                  style={{
+                    marginTop: '0.85rem',
+                    fontSize: '0.82rem',
+                    color: 'var(--text-muted)',
+                    background: 'var(--tint)',
+                    border: '1px solid var(--divider)',
+                    padding: '0.6rem 0.85rem',
+                    borderRadius: '8px',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  💡 <strong>Pro-Tip:</strong> The destination URL is already ultra-short ({result.originalUrl.length} chars). URL shorteners deliver the biggest character reduction on long links (100–300+ chars like Amazon or YouTube links with query params), while shorter links gain <strong>click analytics, passcode protection, and auto-expiry</strong>!
+                </div>
+              )}
             </div>
-          )}
+
+            <div className="result-qr">
+              <QrPrinter key={result.shortUrl} link={result} />
+            </div>
+          </div>
         </div>
       )}
     </div>

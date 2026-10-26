@@ -3,6 +3,7 @@ import validator from 'validator';
 import mongoose from 'mongoose';
 import Url from '../models/Url.js';
 import Click from '../models/Click.js';
+import { generateQrDataUrl, generateQrPng, generateQrSvg } from '../utils/qrCode.js';
 
 // Reserved keywords that cannot be used as custom aliases
 const RESERVED_ALIASES = new Set(['api', 'health', 'dashboard', 'analytics', 'docs', 'favicon.ico']);
@@ -131,11 +132,15 @@ export const createUrl = async (req, res, next) => {
 
     const shortUrl = buildShortUrl(req, newUrl.shortCode);
 
+    // 6. Encode the short URL as a QR image. It is derived from shortUrl, so it is not stored.
+    const qrCode = await generateQrDataUrl(shortUrl);
+
     return res.status(201).json({
       success: true,
       _id: newUrl._id,
       shortCode: newUrl.shortCode,
       shortUrl,
+      qrCode,
       originalUrl: newUrl.originalUrl,
       expiresAt: newUrl.expiresAt,
       isProtected: Boolean(newUrl.passcode),
@@ -291,6 +296,65 @@ export const updateUrl = async (req, res, next) => {
         isProtected: Boolean(url.passcode),
       },
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/urls/:id/qr
+ * Return the QR code for a link's short URL.
+ *   ?format=svg  (default) image/svg+xml
+ *   ?format=png  image/png, 512px — ?download=1 sends it as a file
+ *   ?format=json { shortUrl, qrCode } with qrCode as a data URL
+ */
+export const getQrCode = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const format = String(req.query.format || 'svg').toLowerCase();
+
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid link ID format',
+      });
+    }
+
+    if (!['svg', 'png', 'json'].includes(format)) {
+      return res.status(400).json({
+        success: false,
+        message: 'format must be svg, png or json',
+      });
+    }
+
+    const url = await Url.findById(id);
+    if (!url) {
+      return res.status(404).json({
+        success: false,
+        message: 'URL not found',
+      });
+    }
+
+    const shortUrl = buildShortUrl(req, url.shortCode);
+
+    if (format === 'json') {
+      return res.status(200).json({
+        success: true,
+        shortUrl,
+        qrCode: await generateQrDataUrl(shortUrl),
+      });
+    }
+
+    res.set('Cache-Control', 'public, max-age=86400');
+
+    if (format === 'png') {
+      if (req.query.download) {
+        res.attachment(`linkvault-${url.shortCode}.png`);
+      }
+      return res.type('image/png').send(await generateQrPng(shortUrl));
+    }
+
+    return res.type('image/svg+xml').send(await generateQrSvg(shortUrl));
   } catch (error) {
     next(error);
   }

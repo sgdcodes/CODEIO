@@ -1,4 +1,5 @@
 import axios from 'axios';
+import QRCode from 'qrcode';
 
 // Base backend URL from Vite environment variables (if provided)
 const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL
@@ -138,6 +139,60 @@ const generateCode = () => {
   return out;
 };
 
+// High error correction so a phone camera can read the code off a screen
+const QR_OPTIONS = {
+  errorCorrectionLevel: 'H',
+  margin: 4,
+  color: { dark: '#000000', light: '#FFFFFF' },
+};
+
+const isLoopbackHost = (hostname) =>
+  hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]' || hostname === '::1';
+
+/**
+ * Phones cannot open http://localhost — that address is the phone itself.
+ * While the app is running locally, encode the destination so a scan still works.
+ * On a public host the short URL is encoded instead, so clicks still go through LinkVault.
+ */
+export const getQrPayload = ({ shortUrl, originalUrl }) => {
+  try {
+    const host = new URL(shortUrl).hostname;
+    if (isLoopbackHost(host) && originalUrl) return originalUrl;
+  } catch {
+    // fall through
+  }
+  return shortUrl || originalUrl;
+};
+
+export const isLocalQr = ({ shortUrl }) => {
+  try {
+    return isLoopbackHost(new URL(shortUrl).hostname);
+  } catch {
+    return false;
+  }
+};
+
+const generateQrPngDataUrl = (text, width = 512) =>
+  QRCode.toDataURL(text, { ...QR_OPTIONS, width, type: 'image/png' });
+
+/**
+ * PNG data URL for a link's scan payload.
+ */
+export const getQrCode = async (link) => generateQrPngDataUrl(getQrPayload(link), 512);
+
+/**
+ * Download the QR as a 1024px PNG named after the short code.
+ */
+export const downloadQrPng = async (link) => {
+  const dataUrl = await generateQrPngDataUrl(getQrPayload(link), 1024);
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = `linkvault-${link.shortCode}.png`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+};
+
 // ==========================================
 // EXPORTED API FUNCTIONS (Resilient Hybrid)
 // ==========================================
@@ -157,6 +212,7 @@ export const createShortUrl = async ({ originalUrl, customAlias, expiresInDays, 
       const res = await apiClient.post('/api/urls', payload);
       // Ensure shortUrl uses current origin for perfect browser redirection
       if (res.data) {
+        res.data.serverShortUrl = res.data.shortUrl;
         res.data.shortUrl = `${getOrigin()}/${res.data.shortCode}`;
       }
       return res.data;
