@@ -13,7 +13,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import { fetchAnalytics } from '../api/client';
+import { fetchAnalytics, formatShortLink } from '../api/client';
 import { useTheme } from '../theme/ThemeContext';
 import './Analytics.css';
 
@@ -121,7 +121,7 @@ export default function Analytics() {
             ← Back to Dashboard
           </Link>
           <h1>
-            Analytics for <span className="gradient-text">/{data.shortCode}</span>
+            Analytics for <span className="gradient-text">{formatShortLink(data.shortCode)}</span>
           </h1>
           <p style={{ color: 'var(--text-muted)', wordBreak: 'break-all' }}>
             Target: {data.originalUrl}

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { getQrCode, downloadQrPng, isLocalQr } from '../api/client';
+import { getQrCode, downloadQrPng, isLocalQr, formatShortLink } from '../api/client';
 import './QrPrinter.css';
 
 const STATUS_TEXT = {
@@ -70,7 +70,7 @@ export default function QrPrinter({ link }) {
     }
   };
 
-  const displayUrl = `/${link.shortCode}`;
+  const displayUrl = formatShortLink(link.shortCode);
   const localScan = isLocalQr(link);
 
   return (

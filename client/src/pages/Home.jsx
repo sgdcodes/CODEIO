@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { createShortUrl, fetchUrls } from '../api/client';
+import { createShortUrl, fetchUrls, formatShortLink } from '../api/client';
 import QrPrinter from '../components/QrPrinter';
 import './Home.css';
 
@@ -227,7 +227,7 @@ export default function Home() {
           <div className="result-header">
             <h3>✨ Your Short Link is Ready!</h3>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              {result.originalUrl.length > result.shortUrl.length ? (
+              {result.originalUrl.length > formatShortLink(result.shortCode).length ? (
                 <span
                   className="badge"
                   style={{
@@ -237,7 +237,7 @@ export default function Home() {
                     fontWeight: 600,
                   }}
                 >
-                  📉 {Math.round(((result.originalUrl.length - result.shortUrl.length) / result.originalUrl.length) * 100)}% Shorter
+                  📉 {Math.round(((result.originalUrl.length - formatShortLink(result.shortCode).length) / result.originalUrl.length) * 100)}% Shorter
                 </span>
               ) : (
                 <span
@@ -258,7 +258,7 @@ export default function Home() {
           </div>
 
           <div className="result-link-box">
-            <span className="short-url-text">/{result.shortCode}</span>
+            <span className="short-url-text">{formatShortLink(result.shortCode)}</span>
             <div className="result-actions">
               <button
                 type="button"
@@ -285,7 +285,7 @@ export default function Home() {
                   <strong>Target:</strong> {result.originalUrl} ({result.originalUrl.length} chars)
                 </span>
                 <span>
-                  <strong>Short Link:</strong> {result.shortUrl.length} chars
+                  <strong>Short Link:</strong> {formatShortLink(result.shortCode).length} chars
                 </span>
                 {result.expiresAt && (
                   <span>
@@ -296,7 +296,7 @@ export default function Home() {
                 )}
               </div>
 
-              {result.originalUrl.length <= result.shortUrl.length && (
+              {result.originalUrl.length <= formatShortLink(result.shortCode).length && (
                 <div
                   style={{
                     marginTop: '0.85rem',

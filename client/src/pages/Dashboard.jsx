@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { fetchUrls, deleteShortUrl, updateShortUrl } from '../api/client';
+import { fetchUrls, deleteShortUrl, updateShortUrl, formatShortLink } from '../api/client';
 import QrPrinter from '../components/QrPrinter';
 import './Dashboard.css';
 
@@ -314,7 +314,7 @@ export default function Dashboard() {
                   {/* Clickable Full Short URL */}
                   <div className="link-card-full-url">
                     <a href={item.shortUrl} target="_blank" rel="noreferrer">
-                      /{item.shortCode}
+                      {formatShortLink(item.shortCode)}
                     </a>
                   </div>
 
@@ -406,7 +406,7 @@ export default function Dashboard() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-header">
-              <h3>QR code for /{qrItem.shortCode}</h3>
+              <h3>QR code for {formatShortLink(qrItem.shortCode)}</h3>
               <button
                 type="button"
                 className="modal-close"

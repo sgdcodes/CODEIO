@@ -146,6 +146,10 @@ const QR_OPTIONS = {
   color: { dark: '#000000', light: '#FFFFFF' },
 };
 
+export const BRAND_HOST = 'linkvault.app';
+
+export const formatShortLink = (shortCode) => `${BRAND_HOST}/${shortCode}`;
+
 const isLoopbackHost = (hostname) =>
   hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]' || hostname === '::1';
 
