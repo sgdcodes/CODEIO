@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { getQrCode, downloadQrPng, isLocalQr, formatShortLink } from '../api/client';
+import { getQrCode, downloadQrPng, formatShortLink } from '../api/client';
 import './QrPrinter.css';
 
 const STATUS_TEXT = {
@@ -71,7 +71,6 @@ export default function QrPrinter({ link }) {
   };
 
   const displayUrl = formatShortLink(link.shortCode);
-  const localScan = isLocalQr(link);
 
   return (
     <div className="qrp" data-state={state}>
@@ -130,11 +129,7 @@ export default function QrPrinter({ link }) {
         </button>
       </div>
 
-      <p className="qrp-hint">
-        {localScan
-          ? 'Scan with a phone camera — it opens the destination (phones can’t reach localhost).'
-          : 'Scan with a phone camera to open the short link.'}
-      </p>
+      <p className="qrp-hint">Scan with a phone camera to open the short link.</p>
     </div>
   );
 }

@@ -168,14 +168,6 @@ export const getQrPayload = ({ shortUrl, originalUrl }) => {
   return shortUrl || originalUrl;
 };
 
-export const isLocalQr = ({ shortUrl }) => {
-  try {
-    return isLoopbackHost(new URL(shortUrl).hostname);
-  } catch {
-    return false;
-  }
-};
-
 const generateQrPngDataUrl = (text, width = 512) =>
   QRCode.toDataURL(text, { ...QR_OPTIONS, width, type: 'image/png' });
 
