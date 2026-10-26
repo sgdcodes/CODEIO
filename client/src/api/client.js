@@ -132,7 +132,7 @@ const saveLocalClicks = (clicks) => {
 const generateCode = () => {
   const chars = '23456789abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ';
   let out = '';
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 4; i++) {
     out += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return out;

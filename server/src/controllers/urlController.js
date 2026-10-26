@@ -86,13 +86,13 @@ export const createUrl = async (req, res, next) => {
 
       shortCode = customAlias;
     } else {
-      // 3. Generate unique 7-character nanoid with collision retry
+      // 3. Generate unique 4-character nanoid with collision retry
       let isUnique = false;
       let retries = 0;
       const MAX_RETRIES = 5;
 
       while (!isUnique && retries < MAX_RETRIES) {
-        shortCode = nanoid(7);
+        shortCode = nanoid(4);
         const existing = await Url.findOne({ shortCode });
         if (!existing && !RESERVED_ALIASES.has(shortCode.toLowerCase())) {
           isUnique = true;

@@ -38,7 +38,7 @@ describe('LinkVault API Unit & Integration Tests', () => {
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
-      expect(res.body.shortCode).toHaveLength(7);
+      expect(res.body.shortCode).toHaveLength(4);
       expect(res.body.originalUrl).toBe('https://github.com/nodejs/node');
     });
 

@@ -219,7 +219,34 @@ export default function Home() {
         <div className="glass-card result-card slide-in">
           <div className="result-header">
             <h3>✨ Your Short Link is Ready!</h3>
-            <span className="badge badge-active">Active</span>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              {result.originalUrl.length > result.shortUrl.length ? (
+                <span
+                  className="badge"
+                  style={{
+                    background: 'rgba(16, 185, 129, 0.18)',
+                    color: '#34D399',
+                    border: '1px solid rgba(16, 185, 129, 0.35)',
+                    fontWeight: 600,
+                  }}
+                >
+                  📉 {Math.round(((result.originalUrl.length - result.shortUrl.length) / result.originalUrl.length) * 100)}% Shorter
+                </span>
+              ) : (
+                <span
+                  className="badge"
+                  style={{
+                    background: 'rgba(56, 189, 248, 0.15)',
+                    color: '#38BDF8',
+                    border: '1px solid rgba(56, 189, 248, 0.3)',
+                    fontWeight: 500,
+                  }}
+                >
+                  ⚡ Supercharged Link
+                </span>
+              )}
+              <span className="badge badge-active">Active</span>
+            </div>
           </div>
 
           <div className="result-link-box">
@@ -245,7 +272,10 @@ export default function Home() {
 
           <div className="result-meta">
             <span>
-              <strong>Target:</strong> {result.originalUrl}
+              <strong>Target:</strong> {result.originalUrl} ({result.originalUrl.length} chars)
+            </span>
+            <span>
+              <strong>Short Link:</strong> {result.shortUrl.length} chars
             </span>
             {result.expiresAt && (
               <span>
@@ -255,6 +285,23 @@ export default function Home() {
               </span>
             )}
           </div>
+
+          {result.originalUrl.length <= result.shortUrl.length && (
+            <div
+              style={{
+                marginTop: '0.85rem',
+                fontSize: '0.82rem',
+                color: 'var(--text-muted)',
+                background: 'rgba(255, 255, 255, 0.04)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                padding: '0.6rem 0.85rem',
+                borderRadius: '8px',
+                lineHeight: 1.5,
+              }}
+            >
+              💡 <strong>Pro-Tip:</strong> The destination URL is already ultra-short ({result.originalUrl.length} chars). URL shorteners deliver the biggest character reduction on long links (100–300+ chars like Amazon or YouTube links with query params), while shorter links gain <strong>click analytics, passcode protection, and auto-expiry</strong>!
+            </div>
+          )}
         </div>
       )}
     </div>
