@@ -21,9 +21,10 @@
   align-items: center;
   gap: 0.5rem;
   text-decoration: none;
-  font-family: var(--font-heading);
+  font-family: var(--font-brand);
   font-size: 1.35rem;
   font-weight: 700;
+  letter-spacing: -0.035em;
 }
 
 .brand-icon {

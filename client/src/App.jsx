@@ -1,5 +1,5 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -9,10 +9,19 @@ import RedirectHandler from './pages/RedirectHandler';
 import NotFound from './pages/NotFound';
 import PokemonWalker from './components/PokemonWalker';
 import BackgroundPaths from './components/BackgroundPaths';
+import IntroAnimation from './components/IntroAnimation';
+
+// Short-link paths (e.g. /aB3x) must redirect immediately, so the intro only plays on app pages
+const INTRO_PATHS = /^\/(dashboard|analytics\/[^/]+)?\/?$/;
 
 export default function App() {
+  const { pathname } = useLocation();
+  const [showIntro, setShowIntro] = useState(() => INTRO_PATHS.test(pathname));
+
   return (
     <div className="app-layout">
+      {showIntro && <IntroAnimation onDone={() => setShowIntro(false)} />}
+
       {/* Interactive flowing background paths */}
       <BackgroundPaths />
 

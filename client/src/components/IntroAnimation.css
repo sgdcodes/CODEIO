@@ -1,0 +1,194 @@
+.lv-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: #000000;
+  overflow: hidden;
+  cursor: pointer;
+  transition: opacity 0.7s ease, visibility 0.7s ease;
+}
+
+.lv-intro.is-exit {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.lv-intro-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Final lockup: mark + wordmark */
+.lv-lockup {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 1.6vw, 22px);
+  opacity: 0;
+}
+
+.lv-intro.is-logo .lv-lockup {
+  opacity: 1;
+}
+
+.lv-mark {
+  position: relative;
+  width: clamp(56px, 7vw, 88px);
+  aspect-ratio: 1;
+  flex-shrink: 0;
+}
+
+.lv-mark svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Four-point sparkle that bursts out of the collapsing flare */
+.lv-sparkle {
+  opacity: 0;
+  filter: drop-shadow(0 0 6px #FFFFFF) drop-shadow(0 0 24px rgba(255, 210, 170, 0.85));
+}
+
+.lv-intro.is-logo .lv-sparkle {
+  animation: lvSparkle 1.05s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+
+@keyframes lvSparkle {
+  0% { opacity: 0; transform: scale(1.9) rotate(-35deg); }
+  12% { opacity: 1; }
+  45% { opacity: 1; transform: scale(1) rotate(-12deg); }
+  70% { opacity: 1; transform: scale(0.85) rotate(15deg); }
+  100% { opacity: 0; transform: scale(0.2) rotate(75deg); }
+}
+
+/* Orbit mark the sparkle settles into */
+.lv-orbit-mark ellipse {
+  fill: none;
+  stroke: #FFFFFF;
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.lv-orbit-mark circle {
+  fill: #FFFFFF;
+  transform: scale(0);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.lv-intro.is-logo .lv-orbit-mark ellipse {
+  animation: lvDraw 0.75s cubic-bezier(0.65, 0, 0.35, 1) 0.55s forwards;
+}
+
+.lv-intro.is-logo .lv-orbit-mark ellipse:nth-of-type(2) {
+  animation-delay: 0.68s;
+}
+
+.lv-intro.is-logo .lv-orbit-mark circle {
+  animation: lvPop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) 0.62s forwards;
+}
+
+@keyframes lvDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes lvPop {
+  to { transform: scale(1); }
+}
+
+/* Wordmark with left-to-right letter reveal */
+.lv-wordmark {
+  display: flex;
+  font-family: var(--font-brand);
+  font-weight: 700;
+  font-size: clamp(44px, 7.4vw, 96px);
+  letter-spacing: -0.045em;
+  line-height: 1;
+  color: #FFFFFF;
+}
+
+.lv-wordmark span {
+  display: inline-block;
+  opacity: 0;
+}
+
+.lv-intro.is-logo .lv-wordmark span {
+  animation: lvLetter 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  animation-delay: calc(0.08s + var(--i) * 0.055s);
+}
+
+@keyframes lvLetter {
+  0% { opacity: 0; filter: blur(8px); transform: translateX(-10px); color: #4B4B4B; }
+  60% { opacity: 1; filter: blur(0); color: #9A9A9A; }
+  100% { opacity: 1; transform: none; color: #FFFFFF; }
+}
+
+.lv-tagline {
+  position: absolute;
+  top: calc(50% + clamp(52px, 6.5vw, 82px));
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--font-brand);
+  font-size: clamp(0.72rem, 1.1vw, 0.9rem);
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  opacity: 0;
+}
+
+.lv-intro.is-logo .lv-tagline {
+  animation: lvFadeUp 0.7s ease 0.85s forwards;
+}
+
+@keyframes lvFadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.lv-skip {
+  position: absolute;
+  right: clamp(16px, 3vw, 32px);
+  bottom: clamp(16px, 3vw, 28px);
+  padding: 0.45rem 0.9rem;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 9999px;
+  cursor: pointer;
+  opacity: 0;
+  animation: lvFadeUp 0.5s ease 0.6s forwards;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.lv-skip:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lv-intro.is-logo .lv-sparkle {
+    animation: none;
+  }
+  .lv-intro.is-logo .lv-orbit-mark ellipse,
+  .lv-intro.is-logo .lv-orbit-mark circle,
+  .lv-intro.is-logo .lv-wordmark span,
+  .lv-intro.is-logo .lv-tagline {
+    animation-duration: 0.01s;
+    animation-delay: 0s;
+  }
+}
