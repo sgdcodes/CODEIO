@@ -14,10 +14,29 @@ import {
   Cell,
 } from 'recharts';
 import { fetchAnalytics } from '../api/client';
+import { useTheme } from '../theme/ThemeContext';
 import './Analytics.css';
 
 // Vibrant palette for donut charts
 const DONUT_COLORS = ['#8B5CF6', '#EC4899', '#F97316', '#10B981', '#38BDF8', '#F59E0B'];
+
+// Recharts writes these as SVG attributes, where CSS variables don't resolve
+const CHART_THEME = {
+  dark: {
+    grid: 'rgba(255, 255, 255, 0.08)',
+    axis: '#94A3B8',
+    tick: '#CBD5E1',
+    cursor: 'rgba(255, 255, 255, 0.04)',
+    sliceStroke: 'rgba(12, 12, 12, 0.8)',
+  },
+  light: {
+    grid: 'rgba(15, 17, 21, 0.08)',
+    axis: '#8A92A0',
+    tick: '#3B4250',
+    cursor: 'rgba(15, 17, 21, 0.04)',
+    sliceStroke: '#FFFFFF',
+  },
+};
 
 function ChartTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
@@ -36,6 +55,7 @@ function ChartTooltip({ active, payload, label }) {
 
 export default function Analytics() {
   const { id } = useParams();
+  const chart = CHART_THEME[useTheme().theme];
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -193,22 +213,22 @@ export default function Analytics() {
               </defs>
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="rgba(255, 255, 255, 0.08)"
+                stroke={chart.grid}
                 vertical={false}
               />
               <XAxis
                 dataKey="date"
-                stroke="#94A3B8"
-                tick={{ fontSize: 12, fill: '#CBD5E1' }}
+                stroke={chart.axis}
+                tick={{ fontSize: 12, fill: chart.tick }}
                 tickFormatter={(val) => val.slice(5)} // Show MM-DD
               />
               <YAxis
                 allowDecimals={false}
-                stroke="#94A3B8"
-                tick={{ fontSize: 12, fill: '#CBD5E1' }}
+                stroke={chart.axis}
+                tick={{ fontSize: 12, fill: chart.tick }}
               />
               <Tooltip
-                cursor={{ fill: 'rgba(255, 255, 255, 0.04)' }}
+                cursor={{ fill: chart.cursor }}
                 content={<ChartTooltip />}
               />
               <Bar
@@ -246,7 +266,7 @@ export default function Analytics() {
                         <Cell
                           key={`cell-browser-${index}`}
                           fill={DONUT_COLORS[index % DONUT_COLORS.length]}
-                          stroke="rgba(15, 23, 42, 0.8)"
+                          stroke={chart.sliceStroke}
                           strokeWidth={2}
                         />
                       ))}
@@ -298,7 +318,7 @@ export default function Analytics() {
                         <Cell
                           key={`cell-device-${index}`}
                           fill={DONUT_COLORS[index % DONUT_COLORS.length]}
-                          stroke="rgba(15, 23, 42, 0.8)"
+                          stroke={chart.sliceStroke}
                           strokeWidth={2}
                         />
                       ))}

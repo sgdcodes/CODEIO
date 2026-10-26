@@ -32,12 +32,12 @@
   align-items: center;
   gap: 0.3rem;
   padding: 0.18rem 0.6rem;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--tint);
   border: 1px solid var(--card-border);
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 500;
-  color: #FFFFFF;
+  color: var(--text-main);
   backdrop-filter: blur(8px);
 }
 
@@ -54,7 +54,7 @@
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  background: rgba(15, 23, 42, 0.65);
+  background: var(--surface);
   border: 1px solid var(--card-border);
   border-radius: var(--radius-md);
   padding: 0.22rem 0.85rem;
@@ -71,11 +71,11 @@
 .stats-strip-num {
   font-family: var(--font-heading);
   font-weight: 700;
-  color: #FFFFFF;
+  color: var(--text-main);
 }
 
 .stats-divider {
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--faint);
 }
 
 /* Shorten Card */
@@ -125,7 +125,7 @@
 }
 
 .guide-card {
-  background: rgba(15, 23, 42, 0.65);
+  background: var(--surface);
   border: 1px solid var(--card-border);
   border-radius: var(--radius-md);
   padding: 0.7rem 0.9rem;
@@ -146,7 +146,7 @@
 .guide-card h4 {
   font-size: 0.88rem;
   font-weight: 700;
-  color: #FFFFFF;
+  color: var(--text-main);
   margin-bottom: 0.25rem;
   letter-spacing: -0.01em;
   font-family: var(--font-heading);
@@ -154,7 +154,7 @@
 
 .guide-card p {
   font-size: 0.78rem;
-  color: #CBD5E1;
+  color: var(--text-subtle);
   line-height: 1.35;
   margin: 0;
 }
@@ -163,7 +163,7 @@
   background: rgba(115, 191, 196, 0.15);
   padding: 0.12rem 0.3rem;
   border-radius: 4px;
-  color: #73BFC4;
+  color: var(--code-text);
   font-size: 0.78rem;
   font-weight: 600;
 }
@@ -172,7 +172,7 @@
   background: rgba(115, 191, 196, 0.15);
   padding: 0.15rem 0.35rem;
   border-radius: 4px;
-  color: #73BFC4;
+  color: var(--code-text);
   font-size: 0.84rem;
   font-weight: 600;
 }
@@ -195,7 +195,7 @@
 
 .result-header h3 {
   font-size: 1.05rem;
-  color: #F472B6;
+  color: var(--accent-text);
 }
 
 .result-link-box {
@@ -203,7 +203,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  background: rgba(15, 23, 42, 0.85);
+  background: var(--surface-strong);
   border: 1px solid var(--card-border);
   border-radius: var(--radius-md);
   padding: 0.65rem 1rem;
@@ -214,7 +214,7 @@
   font-family: var(--font-heading);
   font-size: 1rem;
   font-weight: 600;
-  color: #FFFFFF;
+  color: var(--text-main);
   word-break: break-all;
 }
 

@@ -225,7 +225,7 @@ export default function Home() {
                   className="badge"
                   style={{
                     background: 'rgba(16, 185, 129, 0.18)',
-                    color: '#34D399',
+                    color: 'var(--success-text)',
                     border: '1px solid rgba(16, 185, 129, 0.35)',
                     fontWeight: 600,
                   }}
@@ -237,7 +237,7 @@ export default function Home() {
                   className="badge"
                   style={{
                     background: 'rgba(56, 189, 248, 0.15)',
-                    color: '#38BDF8',
+                    color: 'var(--info-text)',
                     border: '1px solid rgba(56, 189, 248, 0.3)',
                     fontWeight: 500,
                   }}
@@ -292,8 +292,8 @@ export default function Home() {
                 marginTop: '0.85rem',
                 fontSize: '0.82rem',
                 color: 'var(--text-muted)',
-                background: 'rgba(255, 255, 255, 0.04)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
+                background: 'var(--tint)',
+                border: '1px solid var(--divider)',
                 padding: '0.6rem 0.85rem',
                 borderRadius: '8px',
                 lineHeight: 1.5,

@@ -1,5 +1,11 @@
 import React, { useEffect, useRef } from 'react';
+import { useTheme } from '../theme/ThemeContext';
 import './BackgroundPaths.css';
+
+const LINE_COLORS = {
+  dark: 'rgba(115, 191, 196, 0.75)',
+  light: 'rgba(30, 130, 138, 0.7)',
+};
 
 const SAMPLES = 64;
 const OVERSCAN = 0.06;
@@ -93,12 +99,21 @@ export default function BackgroundPaths({
   angle = -8,
   speed = 1,
   interactive = true,
+  paused = false,
 }) {
   const canvasRef = useRef(null);
+  const { theme } = useTheme();
+  const colorRef = useRef(LINE_COLORS[theme]);
+  const repaintRef = useRef(null);
+
+  useEffect(() => {
+    colorRef.current = LINE_COLORS[theme];
+    repaintRef.current?.();
+  }, [theme]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || paused) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -123,14 +138,13 @@ export default function BackgroundPaths({
       pointer: { x: 0, y: 0, amount: 0, on: false },
     };
 
-    // Color matching the shader cyan-orange accent line
-    let color = 'rgba(115, 191, 196, 0.75)';
     let start = 0;
     let last = 0;
     let raf = 0;
     let visible = true;
 
-    const paint = () => drawLines(ctx, frame, shape, color);
+    const paint = () => drawLines(ctx, frame, shape, colorRef.current);
+    repaintRef.current = paint;
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -200,12 +214,13 @@ export default function BackgroundPaths({
     play();
 
     return () => {
+      repaintRef.current = null;
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', resize);
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerleave', onLeave);
     };
-  }, [count, spread, angle, speed, interactive]);
+  }, [count, spread, angle, speed, interactive, paused]);
 
   return (
     <div className="background-paths-container" aria-hidden="true">

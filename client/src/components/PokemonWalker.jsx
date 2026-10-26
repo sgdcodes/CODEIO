@@ -126,7 +126,7 @@ const INITIAL_POKEMONS = [
   },
 ];
 
-export default function PokemonWalker() {
+export default function PokemonWalker({ paused = false }) {
   const [pokemons, setPokemons] = useState(INITIAL_POKEMONS);
   const [activeCry, setActiveCry] = useState({ id: null, text: '' });
   const [berries, setBerries] = useState([]);
@@ -136,7 +136,7 @@ export default function PokemonWalker() {
 
   // Smooth animation loop to walk Pokemon across stage
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || paused) return;
 
     const interval = setInterval(() => {
       setPokemons((prevList) =>
@@ -163,7 +163,7 @@ export default function PokemonWalker() {
     }, 40);
 
     return () => clearInterval(interval);
-  }, [isPaused]);
+  }, [isPaused, paused]);
 
   // Click on a Pokemon to make it hop and speak
   const handlePokemonClick = (p) => {

@@ -276,7 +276,7 @@ export default function Dashboard() {
                     </a>
                     <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
                       {item.isProtected && (
-                        <span className="badge" style={{ background: 'rgba(234, 179, 8, 0.2)', color: '#FACC15', borderColor: 'rgba(234, 179, 8, 0.4)' }}>
+                        <span className="badge" style={{ background: 'rgba(234, 179, 8, 0.2)', color: 'var(--yellow-text)', borderColor: 'rgba(234, 179, 8, 0.4)' }}>
                           🔒 PASS
                         </span>
                       )}

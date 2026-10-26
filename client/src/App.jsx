@@ -23,16 +23,16 @@ export default function App() {
       {showIntro && <IntroAnimation onDone={() => setShowIntro(false)} />}
 
       {/* Interactive flowing background paths */}
-      <BackgroundPaths />
+      <BackgroundPaths paused={showIntro} />
 
       {/* Toast notifications container */}
       <Toaster
         position="top-right"
         toastOptions={{
           style: {
-            background: 'rgba(15, 23, 42, 0.95)',
-            color: '#FFFFFF',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
+            background: 'var(--surface-strong)',
+            color: 'var(--text-main)',
+            border: '1px solid var(--card-border)',
             backdropFilter: 'blur(10px)',
             fontFamily: 'var(--font-body)',
             fontSize: '0.9rem',
@@ -68,7 +68,7 @@ export default function App() {
         </div>
 
         {/* Interactive Walking Pokémon docked edge-to-edge covering the bottom */}
-        <PokemonWalker />
+        <PokemonWalker paused={showIntro} />
       </main>
     </div>
   );

@@ -5,7 +5,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(15, 23, 42, 0.75);
+  background: var(--overlay);
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
@@ -19,7 +19,7 @@
   width: 100%;
   padding: 1.8rem;
   border-color: rgba(236, 72, 153, 0.35);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  box-shadow: var(--shadow-modal);
 }
 
 .modal-header {
@@ -31,7 +31,7 @@
 
 .modal-header h3 {
   font-size: 1.15rem;
-  color: #FFFFFF;
+  color: var(--text-main);
 }
 
 .modal-close {
@@ -46,7 +46,7 @@
 }
 
 .modal-close:hover {
-  color: #FFFFFF;
+  color: var(--text-main);
 }
 
 
@@ -67,7 +67,7 @@
   font-family: var(--font-heading);
   font-size: 0.95rem;
   color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--tint);
   padding: 0.4rem 1rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--card-border);
@@ -95,7 +95,7 @@
   background: var(--input-bg);
   border: 1px solid var(--input-border);
   border-radius: var(--radius-md);
-  color: #FFFFFF;
+  color: var(--text-main);
   font-family: var(--font-body);
   font-size: 0.92rem;
   outline: none;
@@ -122,7 +122,7 @@
   background: var(--input-bg);
   border: 1px solid var(--input-border);
   border-radius: var(--radius-md);
-  color: #FFFFFF;
+  color: var(--text-main);
   font-family: var(--font-body);
   font-size: 0.92rem;
   outline: none;
@@ -131,8 +131,8 @@
 }
 
 .sort-select option {
-  background: #1e112a;
-  color: #FFFFFF;
+  background: var(--option-bg);
+  color: var(--text-main);
 }
 
 /* Links Grid */
@@ -162,7 +162,7 @@
   font-family: var(--font-heading);
   font-size: 1.15rem;
   font-weight: 700;
-  color: #FFFFFF;
+  color: var(--text-main);
   text-decoration: none;
   word-break: break-all;
   display: inline-flex;
@@ -172,7 +172,7 @@
 }
 
 .link-card-short:hover {
-  color: #F472B6;
+  color: var(--accent-text);
 }
 
 .link-card-full-url {
@@ -184,13 +184,13 @@
 }
 
 .link-card-full-url a {
-  color: #A78BFA;
+  color: var(--link-text);
   text-decoration: none;
 }
 
 .link-card-full-url a:hover {
   text-decoration: underline;
-  color: #F472B6;
+  color: var(--accent-text);
 }
 
 .link-card-original {
@@ -211,8 +211,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider);
   margin-bottom: 1.25rem;
   font-size: 0.84rem;
   color: var(--text-muted);
@@ -220,7 +220,7 @@
 
 .clicks-pill {
   font-weight: 600;
-  color: #F472B6;
+  color: var(--accent-text);
   background: rgba(236, 72, 153, 0.15);
   padding: 0.2rem 0.6rem;
   border-radius: var(--radius-sm);

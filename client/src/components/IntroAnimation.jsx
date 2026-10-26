@@ -7,8 +7,14 @@ const EXIT_AT = 5.6;
 const EXIT_MS = 700;
 const CANVAS_END = 4.3;
 const DIGIT_COUNT = 300;
+const DIGIT_BUCKETS = 4;
 const RAY_COUNT = 12;
 const RING_BASE = [0, Math.PI / 3, -Math.PI / 3];
+const MAX_INTENSITY = 1.25;
+const MAX_CORE = 0.8 + 0.4 * 1.2;
+const MAX_DPR = 1.5;
+const MIN_FRAME_MS = 1000 / 60 - 2;
+const FONT_STACK = 'system-ui, -apple-system, sans-serif';
 
 const clamp01 = (v) => Math.min(Math.max(v, 0), 1);
 const range = (t, a, b) => clamp01((t - a) / (b - a));
@@ -26,7 +32,7 @@ function makeDigits() {
       x: Math.cos(a) * r,
       y,
       z: Math.sin(a) * r,
-      d: String(Math.floor(Math.random() * 10)),
+      d: Math.floor(Math.random() * 10),
     };
   });
 }
@@ -58,50 +64,106 @@ function ringState(i, t) {
   return { phi, squash, scale };
 }
 
-function drawFlare(ctx, x, y, intensity, R, t, rays) {
-  ctx.save();
-  ctx.globalCompositeOperation = 'lighter';
-
-  const glowR = R * 1.15 * intensity;
-  const glow = ctx.createRadialGradient(x, y, 0, x, y, glowR);
-  glow.addColorStop(0, `rgba(255, 255, 255, ${0.55 * intensity})`);
-  glow.addColorStop(0.18, `rgba(255, 232, 214, ${0.22 * intensity})`);
-  glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-  ctx.fillStyle = glow;
-  ctx.beginPath();
-  ctx.arc(x, y, glowR, 0, Math.PI * 2);
-  ctx.fill();
-
-  const spin = t * 0.15;
-  rays.forEach((ray) => {
-    const len = R * ray.length * intensity;
-    const a = ray.angle + spin;
-    const cos = Math.cos(a);
-    const sin = Math.sin(a);
-    const w = R * ray.width * intensity;
-    const grad = ctx.createLinearGradient(x, y, x + cos * len, y + sin * len);
-    grad.addColorStop(0, `rgba(255, 255, 255, ${0.5 * intensity})`);
-    grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.moveTo(x - sin * w, y + cos * w);
-    ctx.lineTo(x + cos * len, y + sin * len);
-    ctx.lineTo(x + sin * w, y - cos * w);
-    ctx.closePath();
-    ctx.fill();
-  });
-
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.fillStyle = '#FFFFFF';
-  ctx.shadowColor = 'rgba(255, 255, 255, 0.9)';
-  ctx.shadowBlur = R * 0.12;
-  ctx.beginPath();
-  ctx.arc(x, y, R * 0.055 * (0.8 + 0.4 * Math.min(intensity, 1.2)), 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
+function makeSprite(width, height, dpr, draw) {
+  const sprite = document.createElement('canvas');
+  sprite.width = Math.ceil(width * dpr);
+  sprite.height = Math.ceil(height * dpr);
+  const g = sprite.getContext('2d');
+  g.scale(dpr, dpr);
+  draw(g);
+  return { canvas: sprite, width, height };
 }
 
-function drawDigits(ctx, digits, cx, cy, R, t, alpha) {
+// Everything expensive (text shaping, gradients, shadow blur) is rasterised once
+// per resize so each frame is only drawImage calls.
+function buildSprites(R, dpr, rays) {
+  const Rs = R * 0.68;
+  const digits = Array.from({ length: DIGIT_BUCKETS }, (_, bucket) => {
+    const size = Math.max(1, Math.round(Rs * (0.05 + bucket * 0.012)));
+    const w = size;
+    const h = Math.ceil(size * 1.3);
+    return Array.from({ length: 10 }, (_, d) =>
+      makeSprite(w, h, dpr, (g) => {
+        g.fillStyle = '#FFFFFF';
+        g.textAlign = 'center';
+        g.textBaseline = 'middle';
+        g.font = `600 ${size}px ${FONT_STACK}`;
+        g.fillText(String(d), w / 2, h / 2);
+      })
+    );
+  });
+
+  const glowR = R * 1.15 * MAX_INTENSITY;
+  const rayR = R * Math.max(...rays.map((r) => r.length)) * MAX_INTENSITY;
+  const half = Math.ceil(Math.max(glowR, rayR));
+  const flare = makeSprite(half * 2, half * 2, dpr, (g) => {
+    g.translate(half, half);
+    g.globalCompositeOperation = 'lighter';
+    const glow = g.createRadialGradient(0, 0, 0, 0, 0, glowR);
+    glow.addColorStop(0, `rgba(255, 255, 255, ${0.55 * MAX_INTENSITY})`);
+    glow.addColorStop(0.18, `rgba(255, 232, 214, ${0.22 * MAX_INTENSITY})`);
+    glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    g.fillStyle = glow;
+    g.beginPath();
+    g.arc(0, 0, glowR, 0, Math.PI * 2);
+    g.fill();
+
+    rays.forEach((ray) => {
+      const len = R * ray.length * MAX_INTENSITY;
+      const cos = Math.cos(ray.angle);
+      const sin = Math.sin(ray.angle);
+      const w = R * ray.width * MAX_INTENSITY;
+      const grad = g.createLinearGradient(0, 0, cos * len, sin * len);
+      grad.addColorStop(0, `rgba(255, 255, 255, ${0.5 * MAX_INTENSITY})`);
+      grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      g.fillStyle = grad;
+      g.beginPath();
+      g.moveTo(-sin * w, cos * w);
+      g.lineTo(cos * len, sin * len);
+      g.lineTo(sin * w, -cos * w);
+      g.closePath();
+      g.fill();
+    });
+  });
+
+  const coreR = R * 0.055 * MAX_CORE;
+  const blur = R * 0.12;
+  const coreHalf = Math.ceil(coreR + blur * 2);
+  const core = makeSprite(coreHalf * 2, coreHalf * 2, dpr, (g) => {
+    g.fillStyle = '#FFFFFF';
+    g.shadowColor = 'rgba(255, 255, 255, 0.9)';
+    g.shadowBlur = blur * dpr;
+    g.beginPath();
+    g.arc(coreHalf, coreHalf, coreR, 0, Math.PI * 2);
+    g.fill();
+  });
+
+  return { digits, flare, core };
+}
+
+function drawFlare(ctx, sprites, x, y, intensity, t, fade) {
+  const { flare, core } = sprites;
+  const k = intensity / MAX_INTENSITY;
+
+  if (k > 0.001) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = fade * k;
+    ctx.translate(x, y);
+    ctx.rotate(t * 0.15);
+    ctx.scale(k, k);
+    ctx.drawImage(flare.canvas, -flare.width / 2, -flare.height / 2, flare.width, flare.height);
+    ctx.restore();
+  }
+
+  const c = (0.8 + 0.4 * Math.min(intensity, 1.2)) / MAX_CORE;
+  const cw = core.width * c;
+  const ch = core.height * c;
+  ctx.globalAlpha = fade;
+  ctx.drawImage(core.canvas, x - cw / 2, y - ch / 2, cw, ch);
+}
+
+function drawDigits(ctx, sprites, digits, cx, cy, R, t, alpha) {
   if (alpha <= 0.01) return;
   const Rs = R * 0.68;
   const a = t * 0.55;
@@ -111,34 +173,30 @@ function drawDigits(ctx, digits, cx, cy, R, t, alpha) {
   const cosB = Math.cos(b);
   const sinB = Math.sin(b);
 
-  ctx.save();
-  ctx.fillStyle = '#FFFFFF';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  let currentFont = '';
-
-  digits.forEach((p) => {
-    if (Math.random() < 0.012) p.d = String(Math.floor(Math.random() * 10));
+  for (let i = 0; i < digits.length; i++) {
+    const p = digits[i];
+    if (Math.random() < 0.012) p.d = Math.floor(Math.random() * 10);
     const x1 = p.x * cosA + p.z * sinA;
     const z1 = -p.x * sinA + p.z * cosA;
     const y2 = p.y * cosB - z1 * sinB;
     const z2 = p.y * sinB + z1 * cosB;
     const depth = (z2 + 1) / 2;
-    const bucket = Math.round(depth * 3);
-    const font = `600 ${Math.round(Rs * (0.05 + bucket * 0.012))}px system-ui, -apple-system, sans-serif`;
-    if (font !== currentFont) {
-      ctx.font = font;
-      currentFont = font;
-    }
+    const sprite = sprites.digits[Math.round(depth * (DIGIT_BUCKETS - 1))][p.d];
     ctx.globalAlpha = alpha * (0.12 + 0.88 * depth * depth);
-    ctx.fillText(p.d, cx + x1 * Rs, cy + y2 * Rs);
-  });
-  ctx.restore();
+    ctx.drawImage(
+      sprite.canvas,
+      cx + x1 * Rs - sprite.width / 2,
+      cy + y2 * Rs - sprite.height / 2,
+      sprite.width,
+      sprite.height
+    );
+  }
+  ctx.globalAlpha = 1;
 }
 
-function drawRings(ctx, cx, cy, R, t) {
+function drawRings(ctx, cx, cy, R, t, fade) {
   const drawn = easeOut(range(t, 0.1, 1.1));
-  const alpha = 1 - range(t, 3.72, 3.95);
+  const alpha = (1 - range(t, 3.72, 3.95)) * fade;
   if (drawn <= 0 || alpha <= 0) return;
 
   ctx.save();
@@ -167,7 +225,7 @@ export default function IntroAnimation({ onDone }) {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: false });
     const digits = makeDigits();
     const rays = makeRays();
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -176,77 +234,96 @@ export default function IntroAnimation({ onDone }) {
 
     let width = 0;
     let height = 0;
+    let R = 0;
+    let sprites = null;
+    let target = { x: 0, y: 0 };
     let raf = 0;
     let start = 0;
+    let lastDraw = 0;
     let logoTriggered = false;
     let exitTimer = 0;
+    let endTimer = 0;
+    let cancelled = false;
 
     const exit = () => {
       if (exitTimer) return;
       cancelAnimationFrame(raf);
+      window.clearTimeout(endTimer);
       setExiting(true);
       exitTimer = window.setTimeout(() => onDoneRef.current?.(), EXIT_MS);
     };
     exitRef.current = exit;
 
+    const clear = () => {
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, width, height);
+    };
+
+    const measureMark = () => {
+      const rect = markRef.current?.getBoundingClientRect();
+      target = rect
+        ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+        : { x: width / 2, y: height / 2 };
+    };
+
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
       width = window.innerWidth;
       height = window.innerHeight;
+      R = Math.min(width, height) * 0.27;
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-
-    const markCenter = () => {
-      const rect = markRef.current?.getBoundingClientRect();
-      if (!rect) return { x: width / 2, y: height / 2 };
-      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+      sprites = buildSprites(R, dpr, rays);
+      measureMark();
+      clear();
     };
 
     const frame = (now) => {
+      raf = requestAnimationFrame(frame);
       if (!start) start = now;
+      if (now - lastDraw < MIN_FRAME_MS) return;
+      lastDraw = now;
       const t = (now - start) / 1000;
-
-      if (t < CANVAS_END) {
-        ctx.clearRect(0, 0, width, height);
-        ctx.globalAlpha = 1 - range(t, LOGO_AT, CANVAS_END);
-        const R = Math.min(width, height) * 0.27;
-        const move = easeInOut(range(t, 3.5, 3.9));
-        const target = markCenter();
-        const cx = lerp(width / 2, target.x, move);
-        const cy = lerp(height / 2, target.y, move);
-
-        const digitAlpha = easeOut(range(t, 0.5, 1.2)) * (1 - range(t, 3.0, 3.45));
-        drawDigits(ctx, digits, width / 2, height / 2, R, t, digitAlpha);
-        drawRings(ctx, cx, cy, R, t);
-
-        let intensity = easeOut(range(t, 0, 0.35)) * lerp(1, 0.5, range(t, 0.45, 1.1));
-        intensity = lerp(intensity, 1.25, easeInOut(range(t, 3.45, 3.9)));
-        drawFlare(ctx, cx, cy, intensity, R, t, rays);
-        ctx.globalAlpha = 1;
-      } else {
-        ctx.clearRect(0, 0, width, height);
-      }
 
       if (!logoTriggered && t >= LOGO_AT) {
         logoTriggered = true;
         setLogoShown(true);
       }
-      if (t >= EXIT_AT) {
-        exit();
+
+      clear();
+      if (t >= CANVAS_END) {
+        cancelAnimationFrame(raf);
+        endTimer = window.setTimeout(exit, (EXIT_AT - t) * 1000);
         return;
       }
-      raf = requestAnimationFrame(frame);
+
+      const fade = 1 - range(t, LOGO_AT, CANVAS_END);
+      const move = easeInOut(range(t, 3.5, 3.9));
+      const cx = lerp(width / 2, target.x, move);
+      const cy = lerp(height / 2, target.y, move);
+
+      const digitAlpha = easeOut(range(t, 0.5, 1.2)) * (1 - range(t, 3.0, 3.45));
+      drawDigits(ctx, sprites, digits, width / 2, height / 2, R, t, digitAlpha);
+      drawRings(ctx, cx, cy, R, t, fade);
+
+      let intensity = easeOut(range(t, 0, 0.35)) * lerp(1, 0.5, range(t, 0.45, 1.1));
+      intensity = lerp(intensity, MAX_INTENSITY, easeInOut(range(t, 3.45, 3.9)));
+      drawFlare(ctx, sprites, cx, cy, intensity, t, fade);
+      ctx.globalAlpha = 1;
     };
 
     resize();
     window.addEventListener('resize', resize);
+    document.fonts?.ready.then(() => {
+      if (!cancelled) measureMark();
+    });
 
     if (reduceMotion) {
       setLogoShown(true);
       const timer = window.setTimeout(exit, 1400);
       return () => {
+        cancelled = true;
         window.clearTimeout(timer);
         window.clearTimeout(exitTimer);
         window.removeEventListener('resize', resize);
@@ -262,8 +339,10 @@ export default function IntroAnimation({ onDone }) {
     window.addEventListener('keydown', onKey);
 
     return () => {
+      cancelled = true;
       cancelAnimationFrame(raf);
       window.clearTimeout(exitTimer);
+      window.clearTimeout(endTimer);
       window.removeEventListener('resize', resize);
       window.removeEventListener('keydown', onKey);
       document.body.style.overflow = previousOverflow;
