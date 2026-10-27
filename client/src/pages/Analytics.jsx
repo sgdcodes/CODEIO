@@ -247,7 +247,7 @@ export default function Analytics() {
         {/* Top Browsers Donut Chart */}
         <div className="glass-card breakdown-card">
           <h3>🌐 Top Browsers</h3>
-          {data.topBrowsers.length === 0 ? (
+          {(data.topBrowsers || []).length === 0 ? (
             <div className="empty-breakdown">No clicks tracked yet</div>
           ) : (
             <>
@@ -260,7 +260,7 @@ export default function Analytics() {
                       nameKey="name"
                       innerRadius={50}
                       outerRadius={75}
-                      paddingAngle={4}
+                      paddingAngle={(data.topBrowsers || []).length > 1 ? 4 : 0}
                     >
                       {data.topBrowsers.map((entry, index) => (
                         <Cell
@@ -299,7 +299,7 @@ export default function Analytics() {
         {/* Top Devices Donut Chart */}
         <div className="glass-card breakdown-card">
           <h3>📱 Top Devices</h3>
-          {data.topDevices.length === 0 ? (
+          {(data.topDevices || []).length === 0 ? (
             <div className="empty-breakdown">No clicks tracked yet</div>
           ) : (
             <>
@@ -312,7 +312,7 @@ export default function Analytics() {
                       nameKey="name"
                       innerRadius={50}
                       outerRadius={75}
-                      paddingAngle={4}
+                      paddingAngle={(data.topDevices || []).length > 1 ? 4 : 0}
                     >
                       {data.topDevices.map((entry, index) => (
                         <Cell
@@ -351,7 +351,7 @@ export default function Analytics() {
         {/* Top Referrers */}
         <div className="glass-card breakdown-card">
           <h3>🔗 Top Referrers</h3>
-          {data.topReferrers.length === 0 ? (
+          {(data.topReferrers || []).length === 0 ? (
             <div className="empty-breakdown">No clicks tracked yet</div>
           ) : (
             <ul className="breakdown-list" style={{ marginTop: '0.5rem' }}>
