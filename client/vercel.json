@@ -3,12 +3,19 @@
     "api/[...path].js": {
       "maxDuration": 10,
       "includeFiles": "backend/**"
+    },
+    "api/go/[code].js": {
+      "maxDuration": 10,
+      "includeFiles": "backend/**"
+    },
+    "api/resolve/[code].js": {
+      "maxDuration": 10,
+      "includeFiles": "backend/**"
     }
   },
   "rewrites": [
     { "source": "/dashboard", "destination": "/index.html" },
     { "source": "/analytics/:id", "destination": "/index.html" },
-    { "source": "/api/:path*", "destination": "/api/:path*" },
-    { "source": "/:shortCode", "destination": "/api/go/:shortCode" }
+    { "source": "/:shortCode", "destination": "/api/go/:code" }
   ]
 }

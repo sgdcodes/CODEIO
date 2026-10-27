@@ -63,9 +63,11 @@ const publicUrl = (url) => ({
  * GET /api/resolve/:shortCode
  * JSON lookup used by the React redirect page during local development.
  */
+const getShortCode = (req) => req.params.shortCode || req.query.code;
+
 export const resolveUrlJson = async (req, res, next) => {
   try {
-    const { shortCode } = req.params;
+    const shortCode = getShortCode(req);
     const url = await Url.findOne({ shortCode });
 
     if (!url) {
@@ -99,7 +101,7 @@ export const resolveUrlJson = async (req, res, next) => {
  */
 export const handleRedirect = async (req, res, next) => {
   try {
-    const { shortCode } = req.params;
+    const shortCode = getShortCode(req);
 
     // 1. Look up link in database
     const url = await Url.findOne({ shortCode });
