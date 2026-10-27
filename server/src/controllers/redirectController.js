@@ -49,6 +49,50 @@ const recordClickAsync = async (urlId, req) => {
   }
 };
 
+const publicUrl = (url) => ({
+  _id: url._id,
+  shortCode: url.shortCode,
+  originalUrl: url.originalUrl,
+  expiresAt: url.expiresAt,
+  clicks: url.clicks,
+  createdAt: url.createdAt,
+  isProtected: Boolean(url.passcode),
+});
+
+/**
+ * GET /api/resolve/:shortCode
+ * JSON lookup used by the React redirect page during local development.
+ */
+export const resolveUrlJson = async (req, res, next) => {
+  try {
+    const { shortCode } = req.params;
+    const url = await Url.findOne({ shortCode });
+
+    if (!url) {
+      return res.status(200).json({ found: false });
+    }
+
+    if (url.expiresAt && new Date(url.expiresAt) <= new Date()) {
+      return res.status(200).json({ found: true, expired: true, url: publicUrl(url) });
+    }
+
+    const providedCode = req.query.passcode || req.headers['x-link-passcode'];
+    if (url.passcode && (!providedCode || providedCode !== url.passcode)) {
+      return res.status(200).json({ found: true, isProtected: true, url: publicUrl(url) });
+    }
+
+    recordClickAsync(url._id, req);
+
+    return res.status(200).json({
+      found: true,
+      originalUrl: url.originalUrl,
+      url: publicUrl(url),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 /**
  * GET /:shortCode
  * Find shortened URL and redirect with HTTP 302

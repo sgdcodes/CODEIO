@@ -17,6 +17,9 @@ yarn-error.log*
 lerna-debug.log*
 *.log
 
+# Copied onto Vercel during install so the serverless API can import Express
+client/backend/
+
 # Build output
 dist/
 build/

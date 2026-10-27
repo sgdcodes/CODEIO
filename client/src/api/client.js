@@ -12,8 +12,28 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 4000,
+  timeout: 12000,
 });
+
+const isBrowserLocalhost = () => {
+  if (typeof window === 'undefined') return true;
+  const host = window.location.hostname;
+  return host === 'localhost' || host === '127.0.0.1' || host === '[::1]';
+};
+
+const shouldUseApi = () => {
+  if (API_BASE_URL.includes('trycloudflare.com')) return false;
+  if (API_BASE_URL) return true;
+  return !isBrowserLocalhost();
+};
+
+const failOrFallback = (err, fallbackMessage) => {
+  const message = err.response?.data?.message || fallbackMessage;
+  if (!isBrowserLocalhost()) {
+    throw new Error(message);
+  }
+  console.warn(`[LinkVault] ${fallbackMessage}:`, err.message);
+};
 
 // ==========================================
 // CLIENT-SIDE PERSISTENT ENGINE (Zero-Downtime Fallback)
@@ -198,8 +218,7 @@ export const createShortUrl = async ({ originalUrl, customAlias, expiresInDays, 
   const trimmedAlias = customAlias?.trim();
   const trimmedPasscode = passcode?.trim();
 
-  // Try cloud backend first if configured and not pointing to dead tunnel
-  if (API_BASE_URL && !API_BASE_URL.includes('trycloudflare.com')) {
+  if (shouldUseApi()) {
     try {
       const payload = { originalUrl: trimmedUrl };
       if (trimmedAlias) payload.customAlias = trimmedAlias;
@@ -213,7 +232,7 @@ export const createShortUrl = async ({ originalUrl, customAlias, expiresInDays, 
       }
       return res.data;
     } catch (err) {
-      console.warn('[LinkVault] Backend call failed, using high-speed client engine:', err.message);
+      failOrFallback(err, 'Could not save the link on the server. Please try again.');
     }
   }
 
@@ -250,12 +269,12 @@ export const createShortUrl = async ({ originalUrl, customAlias, expiresInDays, 
 };
 
 export const updateShortUrl = async (id, data) => {
-  if (API_BASE_URL && !API_BASE_URL.includes('trycloudflare.com')) {
+  if (shouldUseApi()) {
     try {
       const response = await apiClient.patch(`/api/urls/${id}`, data);
       return response.data;
     } catch (err) {
-      console.warn('[LinkVault] Backend update failed, using client engine:', err.message);
+      failOrFallback(err, 'Could not update the link on the server.');
     }
   }
 
@@ -282,7 +301,7 @@ export const updateShortUrl = async (id, data) => {
 };
 
 export const fetchUrls = async () => {
-  if (API_BASE_URL && !API_BASE_URL.includes('trycloudflare.com')) {
+  if (shouldUseApi()) {
     try {
       const response = await apiClient.get('/api/urls');
       if (response.data?.urls) {
@@ -293,7 +312,7 @@ export const fetchUrls = async () => {
         return response.data;
       }
     } catch (err) {
-      console.warn('[LinkVault] Backend fetch failed, loading client store:', err.message);
+      failOrFallback(err, 'Could not load links from the server.');
     }
   }
 
@@ -306,12 +325,12 @@ export const fetchUrls = async () => {
 };
 
 export const deleteShortUrl = async (id) => {
-  if (API_BASE_URL && !API_BASE_URL.includes('trycloudflare.com')) {
+  if (shouldUseApi()) {
     try {
       const response = await apiClient.delete(`/api/urls/${id}`);
       return response.data;
     } catch (err) {
-      console.warn('[LinkVault] Backend delete failed, deleting locally:', err.message);
+      failOrFallback(err, 'Could not delete the link on the server.');
     }
   }
 
@@ -321,12 +340,12 @@ export const deleteShortUrl = async (id) => {
 };
 
 export const fetchAnalytics = async (id) => {
-  if (API_BASE_URL && !API_BASE_URL.includes('trycloudflare.com')) {
+  if (shouldUseApi()) {
     try {
       const response = await apiClient.get(`/api/urls/${id}/analytics`);
       if (response.data) return response.data;
     } catch (err) {
-      console.warn('[LinkVault] Backend analytics failed, generating local report:', err.message);
+      failOrFallback(err, 'Could not load analytics from the server.');
     }
   }
 
@@ -354,33 +373,47 @@ export const fetchAnalytics = async (id) => {
 
   return {
     success: true,
-    url: urlItem,
-    analytics: {
-      totalClicks: baseClicks,
-      days,
-      browsers: [
-        { name: 'Chrome', count: Math.ceil(baseClicks * 0.55) },
-        { name: 'Safari', count: Math.ceil(baseClicks * 0.25) },
-        { name: 'Firefox', count: Math.ceil(baseClicks * 0.12) },
-        { name: 'Edge / Other', count: Math.max(0, baseClicks - Math.ceil(baseClicks * 0.92)) },
-      ].filter((b) => b.count > 0),
-      devices: [
-        { name: 'Mobile', count: Math.ceil(baseClicks * 0.62) },
-        { name: 'Desktop', count: Math.ceil(baseClicks * 0.33) },
-        { name: 'Tablet', count: Math.max(0, baseClicks - Math.ceil(baseClicks * 0.95)) },
-      ].filter((d) => d.count > 0),
-      referrers: [
-        { name: 'Direct', count: Math.ceil(baseClicks * 0.45) },
-        { name: 'Twitter / X', count: Math.ceil(baseClicks * 0.3) },
-        { name: 'GitHub', count: Math.ceil(baseClicks * 0.15) },
-        { name: 'LinkedIn', count: Math.max(0, baseClicks - Math.ceil(baseClicks * 0.9)) },
-      ].filter((r) => r.count > 0),
-    },
+    urlId: urlItem._id,
+    shortCode: urlItem.shortCode,
+    shortUrl: urlItem.shortUrl,
+    originalUrl: urlItem.originalUrl,
+    totalClicks: baseClicks,
+    status: urlItem.status || 'active',
+    createdAt: urlItem.createdAt,
+    expiresAt: urlItem.expiresAt,
+    clicksPerDay: days,
+    topBrowsers: [
+      { name: 'Chrome', count: Math.ceil(baseClicks * 0.55) },
+      { name: 'Safari', count: Math.ceil(baseClicks * 0.25) },
+      { name: 'Firefox', count: Math.ceil(baseClicks * 0.12) },
+      { name: 'Edge / Other', count: Math.max(0, baseClicks - Math.ceil(baseClicks * 0.92)) },
+    ].filter((b) => b.count > 0),
+    topDevices: [
+      { name: 'Mobile', count: Math.ceil(baseClicks * 0.62) },
+      { name: 'Desktop', count: Math.ceil(baseClicks * 0.33) },
+      { name: 'Tablet', count: Math.max(0, baseClicks - Math.ceil(baseClicks * 0.95)) },
+    ].filter((d) => d.count > 0),
+    topReferrers: [
+      { name: 'Direct', count: Math.ceil(baseClicks * 0.45) },
+      { name: 'Twitter / X', count: Math.ceil(baseClicks * 0.3) },
+      { name: 'GitHub', count: Math.ceil(baseClicks * 0.15) },
+      { name: 'LinkedIn', count: Math.max(0, baseClicks - Math.ceil(baseClicks * 0.9)) },
+    ].filter((r) => r.count > 0),
   };
 };
 
-// Resolution function for the in-browser redirect handler
 export const resolveShortUrl = async (shortCode, passcode) => {
+  if (shouldUseApi()) {
+    try {
+      const response = await apiClient.get(`/api/resolve/${encodeURIComponent(shortCode)}`, {
+        params: passcode ? { passcode } : undefined,
+      });
+      if (response.data) return response.data;
+    } catch (err) {
+      failOrFallback(err, 'Could not open this short link.');
+    }
+  }
+
   const urls = getLocalUrls();
   const item = urls.find((u) => u.shortCode.toLowerCase() === shortCode.toLowerCase());
 

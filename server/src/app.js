@@ -4,8 +4,11 @@ import helmet from 'helmet';
 import urlRoutes from './routes/urlRoutes.js';
 import redirectRoutes from './routes/redirectRoutes.js';
 import errorHandler from './middleware/errorHandler.js';
+import { handleRedirect, resolveUrlJson } from './controllers/redirectController.js';
 
 const app = express();
+
+app.set('trust proxy', 1);
 
 // Security headers with helmet
 app.use(helmet());
@@ -48,6 +51,10 @@ app.use(express.json());
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
+
+app.get('/api/resolve/:shortCode', resolveUrlJson);
+app.get('/api/go/:shortCode', handleRedirect);
+app.get('/go/:shortCode', handleRedirect);
 
 // 2. Core API routes
 app.use('/api/urls', urlRoutes);

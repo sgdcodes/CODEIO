@@ -172,6 +172,21 @@ describe('LinkVault API Unit & Integration Tests', () => {
       const res = await request(app).get(`/${createRes.body.shortCode}`);
       expect(res.status).toBe(302);
       expect(res.headers.location).toBe('https://example.com');
+
+      const goRes = await request(app).get(`/api/go/${createRes.body.shortCode}`);
+      expect(goRes.status).toBe(302);
+      expect(goRes.headers.location).toBe('https://example.com');
+    });
+
+    it('should resolve a short code as JSON', async () => {
+      const createRes = await request(app)
+        .post('/api/urls')
+        .send({ originalUrl: 'https://example.com/json-resolve' });
+
+      const res = await request(app).get(`/api/resolve/${createRes.body.shortCode}`);
+      expect(res.status).toBe(200);
+      expect(res.body.found).toBe(true);
+      expect(res.body.originalUrl).toBe('https://example.com/json-resolve');
     });
 
     it('should require passcode for password-protected links', async () => {
