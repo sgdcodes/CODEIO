@@ -11,6 +11,18 @@
     "api/resolve/[code].js": {
       "maxDuration": 10,
       "includeFiles": "backend/**"
+    },
+    "api/urls/[id].js": {
+      "maxDuration": 10,
+      "includeFiles": "backend/**"
+    },
+    "api/urls/[id]/analytics.js": {
+      "maxDuration": 10,
+      "includeFiles": "backend/**"
+    },
+    "api/urls/[id]/qr.js": {
+      "maxDuration": 10,
+      "includeFiles": "backend/**"
     }
   },
   "rewrites": [
