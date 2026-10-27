@@ -314,7 +314,7 @@ export default function Dashboard() {
                   {/* Clickable Full Short URL */}
                   <div className="link-card-full-url">
                     <a href={item.shortUrl} target="_blank" rel="noreferrer">
-                      {formatShortLink(item.shortCode)}
+                      {formatShortLink(item.shortCode, item.shortUrl)}
                     </a>
                   </div>
 
@@ -406,7 +406,7 @@ export default function Dashboard() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-header">
-              <h3>QR code for {formatShortLink(qrItem.shortCode)}</h3>
+              <h3>QR code for {formatShortLink(qrItem.shortCode, qrItem.shortUrl)}</h3>
               <button
                 type="button"
                 className="modal-close"

@@ -121,7 +121,7 @@ export default function Analytics() {
             ← Back to Dashboard
           </Link>
           <h1>
-            Analytics for <span className="gradient-text">{formatShortLink(data.shortCode)}</span>
+            Analytics for <span className="gradient-text">{formatShortLink(data.shortCode, data.shortUrl)}</span>
           </h1>
           <p style={{ color: 'var(--text-muted)', wordBreak: 'break-all' }}>
             Target: {data.originalUrl}

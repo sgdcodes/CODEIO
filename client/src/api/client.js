@@ -166,9 +166,20 @@ const QR_OPTIONS = {
   color: { dark: '#000000', light: '#FFFFFF' },
 };
 
-export const BRAND_HOST = 'linkvault.app';
-
-export const formatShortLink = (shortCode) => `${BRAND_HOST}/${shortCode}`;
+export const formatShortLink = (shortCode, shortUrl) => {
+  if (shortUrl) {
+    try {
+      const parsed = new URL(shortUrl);
+      return `${parsed.host}${parsed.pathname}`.replace(/\/$/, '');
+    } catch {
+      // fall through
+    }
+  }
+  if (typeof window !== 'undefined' && window.location?.host) {
+    return `${window.location.host}/${shortCode}`;
+  }
+  return `linkvault-alpha-d610.vercel.app/${shortCode}`;
+};
 
 const isLoopbackHost = (hostname) =>
   hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]' || hostname === '::1';

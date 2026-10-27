@@ -227,7 +227,7 @@ export default function Home() {
           <div className="result-header">
             <h3>✨ Your Short Link is Ready!</h3>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              {result.originalUrl.length > formatShortLink(result.shortCode).length ? (
+              {result.originalUrl.length > formatShortLink(result.shortCode, result.shortUrl).length ? (
                 <span
                   className="badge"
                   style={{
@@ -237,7 +237,7 @@ export default function Home() {
                     fontWeight: 600,
                   }}
                 >
-                  📉 {Math.round(((result.originalUrl.length - formatShortLink(result.shortCode).length) / result.originalUrl.length) * 100)}% Shorter
+                  📉 {Math.round(((result.originalUrl.length - formatShortLink(result.shortCode, result.shortUrl).length) / result.originalUrl.length) * 100)}% Shorter
                 </span>
               ) : (
                 <span
@@ -258,7 +258,7 @@ export default function Home() {
           </div>
 
           <div className="result-link-box">
-            <span className="short-url-text">{formatShortLink(result.shortCode)}</span>
+            <span className="short-url-text">{formatShortLink(result.shortCode, result.shortUrl)}</span>
             <div className="result-actions">
               <button
                 type="button"
@@ -285,7 +285,7 @@ export default function Home() {
                   <strong>Target:</strong> {result.originalUrl} ({result.originalUrl.length} chars)
                 </span>
                 <span>
-                  <strong>Short Link:</strong> {formatShortLink(result.shortCode).length} chars
+                  <strong>Short Link:</strong> {formatShortLink(result.shortCode, result.shortUrl).length} chars
                 </span>
                 {result.expiresAt && (
                   <span>
@@ -296,7 +296,7 @@ export default function Home() {
                 )}
               </div>
 
-              {result.originalUrl.length <= formatShortLink(result.shortCode).length && (
+              {result.originalUrl.length <= formatShortLink(result.shortCode, result.shortUrl).length && (
                 <div
                   style={{
                     marginTop: '0.85rem',

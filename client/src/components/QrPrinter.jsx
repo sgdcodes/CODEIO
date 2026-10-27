@@ -70,7 +70,7 @@ export default function QrPrinter({ link }) {
     }
   };
 
-  const displayUrl = formatShortLink(link.shortCode);
+  const displayUrl = formatShortLink(link.shortCode, link.shortUrl);
 
   return (
     <div className="qrp" data-state={state}>
