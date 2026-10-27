@@ -16,6 +16,6 @@
   "rewrites": [
     { "source": "/dashboard", "destination": "/index.html" },
     { "source": "/analytics/:id", "destination": "/index.html" },
-    { "source": "/:shortCode", "destination": "/api/go/:code" }
+    { "source": "/:code", "destination": "/api/go/:code" }
   ]
 }
